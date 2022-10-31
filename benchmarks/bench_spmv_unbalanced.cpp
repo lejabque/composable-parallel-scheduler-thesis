@@ -23,7 +23,7 @@ static constexpr size_t MIN_SIZE = 1 << 13;
 static constexpr size_t MAX_SIZE = 1 << 17;
 
 BENCHMARK(BM_SpmvBenchUnbalanced)
-    ->Name("SvmpUnbalanced_" + GetParallelMode())
+    ->Name("SpmvUnbalanced_" + GetParallelMode())
     ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->RangePair(MIN_SIZE, MAX_SIZE, MIN_SIZE, MAX_SIZE);

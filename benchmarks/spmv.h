@@ -47,7 +47,8 @@ enum class SparseKind {
   UNBALANCED,
 };
 
-inline thread_local std::mt19937_64 RandomGenerator{std::random_device()()};
+inline thread_local std::default_random_engine RandomGenerator{
+    std::random_device()()};
 
 template <SparseKind Kind>
 static SparseMatrixCSR GenSparseMatrix(size_t n, size_t m, double density) {
@@ -56,20 +57,22 @@ static SparseMatrixCSR GenSparseMatrix(size_t n, size_t m, double density) {
   SparseMatrixCSR out;
   out.Dimensions.Rows = n;
   out.Dimensions.Columns = m;
-  auto densityGen = std::bernoulli_distribution(density);
   auto valueGen = std::uniform_real_distribution<double>(-1e9, 1e9);
+  auto posGen = std::uniform_int_distribution<size_t>(0, n * m - 1);
 
   std::set<std::pair<size_t, size_t>> positions;
   size_t elements_n = n * m * density;
   while (positions.size() < elements_n) {
+    size_t pos = posGen(RandomGenerator);
     if constexpr (Kind == SparseKind::BALANCED) {
-      positions.insert({RandomGenerator() % n, RandomGenerator() % m});
+      positions.insert({pos / m, pos % m});
     } else if constexpr (Kind == SparseKind::UNBALANCED) {
-      auto row = RandomGenerator() % n;
-      auto col = RandomGenerator() % row;
-      positions.insert({row, col});
+      auto row = pos / m;
+      auto col = pos % m;
+      positions.insert(
+          {std::max(row, col), std::min(row, col)}); // triangle matrix
     } else {
-      // unreachable
+      // check that all possible kinds are handled
       static_assert(Kind == SparseKind::BALANCED ||
                     Kind == SparseKind::UNBALANCED);
     }

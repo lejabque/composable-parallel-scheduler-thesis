@@ -3,7 +3,12 @@ project(composable-parallel-scheduler)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+
+# TODO: use clang instead of default compiler?
+message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 find_package(GTest REQUIRED)
 find_package(benchmark REQUIRED)

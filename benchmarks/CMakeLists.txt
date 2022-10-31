@@ -1,7 +1,8 @@
 list(APPEND OMP_MODES OMP_STATIC OMP_DYNAMIC OMP_GUIDED OMP_RUNTIME)
 list(APPEND TBB_MODES TBB_STATIC TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY)
+# TODO: add rapid start proof of concept for TBB
 
-list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced)
+list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce)
 
 foreach(bench IN LISTS BENCHMARKS)
     # serial

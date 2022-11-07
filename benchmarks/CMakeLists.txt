@@ -6,9 +6,9 @@ list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce)
 
 foreach(bench IN LISTS BENCHMARKS)
     # serial
-    add_executable(${bench}_serial ${bench}.cpp spmv.cpp)
-    target_compile_definitions(${bench}_serial PRIVATE SERIAL=1)
-    target_link_libraries(${bench}_serial benchmark::benchmark)
+    add_executable(${bench}_SERIAL ${bench}.cpp spmv.cpp)
+    target_compile_definitions(${bench}_SERIAL PRIVATE SERIAL=1)
+    target_link_libraries(${bench}_SERIAL benchmark::benchmark)
     # openmp
     foreach(mode IN LISTS OMP_MODES)
         add_executable(${bench}_${mode} ${bench}.cpp spmv.cpp)

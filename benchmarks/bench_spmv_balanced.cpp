@@ -1,5 +1,4 @@
 #include <benchmark/benchmark.h>
-#include <iostream>
 
 #include "parallel_for.h"
 #include "spmv.h"

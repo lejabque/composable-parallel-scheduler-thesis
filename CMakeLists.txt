@@ -26,6 +26,8 @@ option(TBB_TEST OFF)
 
 FetchContent_MakeAvailable(onetbb)
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
+
 
 # build options
 option(USE_SANITIZERS "Enable to build with undefined,leak and address sanitizers" OFF)

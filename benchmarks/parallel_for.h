@@ -1,9 +1,4 @@
-#ifdef TBB_MODE
-#include "oneapi/tbb/blocked_range.h"
-#include <tbb/parallel_for.h>
-#endif
-#include <cstddef>
-#include <thread>
+#include <string>
 
 #define STR_(x) #x
 #define STR(x) STR_(x)
@@ -20,16 +15,35 @@ inline std::string GetParallelMode() {
 #endif
 }
 
-inline int GetNumThreads() {
-#if HAVE_TBB
-  return ::tbb::info::
-      default_concurrency(); // tbb::this_task_arena::max_concurrency();
-#elif HAVE_OMP
-  return omp_get_max_threads();
-#else
-  return std::thread::hardware_concurrency();
+#ifdef TBB_MODE
+#include "oneapi/tbb/blocked_range.h"
+#include <tbb/parallel_for.h>
 #endif
+#include <cstddef>
+#include <thread>
+
+inline int GetNumThreads() {
+  // TODO: support have_tbb, have_omp
+  // #ifdef TBB_MODE
+  //   return ::tbb::info::
+  //       default_concurrency(); // tbb::this_task_arena::max_concurrency();
+  // #elif defined OMP_MODE
+  //   return omp_get_max_threads();
+  // #else
+  //   return std::thread::hardware_concurrency();
+  // #endif
+  return std::thread::hardware_concurrency();
 }
+
+#define OMP_STATIC 1
+#define OMP_DYNAMIC 2
+#define OMP_GUIDED 3
+#define OMP_RUNTIME 4
+
+#define TBB_SIMPLE 1
+#define TBB_AUTO 2
+#define TBB_AFFINITY 3
+#define TBB_CONST_AFFINITY 4
 
 template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #ifdef SERIAL

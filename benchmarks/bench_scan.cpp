@@ -1,6 +1,3 @@
-// TODO: implement parallel scan like prefix sum, e.g.
-// https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda
-// https://moderngpu.github.io/scan.html
 #include "spmv.h"
 #include <benchmark/benchmark.h>
 
@@ -8,18 +5,17 @@
 
 static constexpr size_t MIN_SIZE = 1 << 10;
 static constexpr size_t MAX_SIZE = 1 << 27;
-// TODO: custom block size?
-static constexpr size_t BLOCK_SIZE = 1 << 10;
 
 size_t GetBlockPow(size_t size) {
   size_t block_pow = 0;
-  while (size > BLOCK_SIZE) {
+  while (size > 1) {
     size >>= 1;
-    block_pow++;
+    ++block_pow;
   }
   return block_pow;
 }
 
+// https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda
 static void DoScan(size_t size_pow, std::vector<double> &data) {
   auto size = data.size();
   // up-sweep phase

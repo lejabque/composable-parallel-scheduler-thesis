@@ -1,11 +1,9 @@
-#ifdef TBB_MODE
-#include <tbb/blocked_range.h>
-#include <tbb/parallel_for.h>
-#endif
+#include "parallel_for.h"
 #include <cassert>
 #include <cstddef>
 #include <random>
 #include <set>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -16,31 +14,73 @@ struct MatrixDimensions {
   size_t Columns;
 };
 
-struct DenseMatrix {
+template <typename T> struct DenseMatrix {
   MatrixDimensions Dimensions;
-  std::vector<std::vector<double>> Data;
+  std::vector<std::vector<T>> Data;
 };
 
-struct SparseMatrixCSR {
+template <typename T> struct SparseMatrixCSR {
   MatrixDimensions Dimensions;
-  std::vector<double> Values;
+  std::vector<T> Values;
   std::vector<size_t> ColumnIndex;
   std::vector<size_t> RowIndex;
 };
 
-inline double MultiplyRow(const SPMV::SparseMatrixCSR &A,
-                          const std::vector<double> &x, size_t row) {
-  double y = 0;
+template <typename T>
+T MultiplyRow(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
+              size_t row) {
+  T y = 0;
   for (size_t i = A.RowIndex[row]; i < A.RowIndex[row + 1]; ++i) {
     y += A.Values[i] * x[A.ColumnIndex[i]];
   }
   return y;
 }
 
-SparseMatrixCSR DenseToSparse(const DenseMatrix &in);
+template <typename T>
+void MultiplyMatrix(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
+                    std::vector<T> &out) {
+  ParallelFor(0, A.Dimensions.Rows,
+              [&](size_t i) { out[i] = MultiplyRow(A, x, i); });
+}
 
-void DensePmvSerial(const DenseMatrix &A, const std::vector<double> &x,
-                    std::vector<double> &y);
+template <typename T>
+void MultiplyMatrix(const SPMV::DenseMatrix<T> &A, const std::vector<T> &x,
+                    std::vector<T> &out) {
+  ParallelFor(0, A.Dimensions.Rows, [&](size_t i) {
+    out[i] = 0;
+    for (size_t j = 0; j != A.Dimensions.Columns; ++j) {
+      out[i] += A.Data[i][j] * x[j];
+    }
+  });
+}
+
+template <typename T>
+SparseMatrixCSR<T> DenseToSparse(const DenseMatrix<T> &in) {
+  SparseMatrixCSR<T> out;
+  out.Dimensions = in.Dimensions;
+  out.RowIndex.push_back(0);
+  for (size_t i = 0; i < in.Dimensions.Rows; ++i) {
+    for (size_t j = 0; j < in.Dimensions.Columns; ++j) {
+      if (in.Data[i][j] != 0) {
+        out.Values.push_back(in.Data[i][j]);
+        out.ColumnIndex.push_back(j);
+      }
+    }
+    out.RowIndex.push_back(out.ColumnIndex.size());
+  }
+  return out;
+}
+
+template <typename T>
+void DensePmvSerial(const DenseMatrix<T> &A, const std::vector<T> &x,
+                    std::vector<T> &y) {
+  y.resize(A.Dimensions.Rows);
+  for (size_t i = 0; i < A.Dimensions.Rows; ++i) {
+    for (size_t j = 0; j < A.Dimensions.Columns; ++j) {
+      y[i] += A.Data[i][j] * x[j];
+    }
+  }
+}
 
 enum class SparseKind {
   BALANCED,
@@ -50,14 +90,14 @@ enum class SparseKind {
 inline thread_local std::default_random_engine RandomGenerator{
     std::random_device()()};
 
-template <SparseKind Kind>
-static SparseMatrixCSR GenSparseMatrix(size_t n, size_t m, double density) {
+template <typename T, SparseKind Kind>
+SparseMatrixCSR<T> GenSparseMatrix(size_t n, size_t m, double density) {
   assert(0 <= density && density <= 1.0);
 
-  SparseMatrixCSR out;
+  SparseMatrixCSR<T> out;
   out.Dimensions.Rows = n;
   out.Dimensions.Columns = m;
-  auto valueGen = std::uniform_real_distribution<double>(-1e9, 1e9);
+  auto valueGen = std::uniform_real_distribution<T>(-1e9, 1e9);
   auto posGen = std::uniform_int_distribution<size_t>(0, n * m - 1);
 
   std::set<std::pair<size_t, size_t>> positions;
@@ -95,12 +135,18 @@ static SparseMatrixCSR GenSparseMatrix(size_t n, size_t m, double density) {
   return out;
 }
 
-static std::vector<double> GenVector(size_t m) {
-  auto valueGen = std::uniform_real_distribution<double>(-1e9, 1e9);
-  std::vector<double> x;
-  x.resize(m);
-  for (auto &el : x) {
-    el = valueGen(RandomGenerator);
+template <typename T> std::vector<T> GenVector(size_t m) {
+  std::vector<T> x(m);
+  if constexpr (std::is_floating_point_v<T>) {
+    auto valueGen = std::uniform_real_distribution<T>(-1e9, 1e9);
+    for (auto &el : x) {
+      el = valueGen(RandomGenerator);
+    }
+  } else {
+    auto valueGen = std::uniform_int_distribution<T>(0, 1e6);
+    for (auto &el : x) {
+      el = valueGen(RandomGenerator);
+    }
   }
   return x;
 }

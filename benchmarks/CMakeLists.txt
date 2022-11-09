@@ -6,19 +6,21 @@ list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce be
 
 foreach(bench IN LISTS BENCHMARKS)
     # serial
-    add_executable(${bench}_SERIAL ${bench}.cpp spmv.cpp)
+    add_executable(${bench}_SERIAL ${bench}.cpp)
     target_compile_definitions(${bench}_SERIAL PRIVATE SERIAL=1)
     target_link_libraries(${bench}_SERIAL benchmark::benchmark)
     # openmp
     foreach(mode IN LISTS OMP_MODES)
-        add_executable(${bench}_${mode} ${bench}.cpp spmv.cpp)
+        add_executable(${bench}_${mode} ${bench}.cpp)
         target_compile_definitions(${bench}_${mode} PRIVATE OMP_MODE=${mode})
         target_link_libraries(${bench}_${mode} benchmark::benchmark OpenMP::OpenMP_CXX)
     endforeach()
     # tbb
     foreach(mode IN LISTS TBB_MODES)
-        add_executable(${bench}_${mode} ${bench}.cpp spmv.cpp)
+        add_executable(${bench}_${mode} ${bench}.cpp)
         target_compile_definitions(${bench}_${mode} PRIVATE TBB_MODE=${mode})
         target_link_libraries(${bench}_${mode} benchmark::benchmark TBB::tbb)
     endforeach()
 endforeach()
+
+add_subdirectory(tests)

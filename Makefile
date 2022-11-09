@@ -40,3 +40,7 @@ bench_scan:
 
 bench: clean_bench bench_dir release bench_spmv bench_reduce bench_scan
 
+bench_tests:
+	@for x in $(shell ls -1 cmake-build-release/benchmarks/tests/*tests* | xargs -n 1 basename | sort ) ; do numactl -N 0 cmake-build-release/benchmarks/tests/$$x; done
+
+tests: release bench_tests

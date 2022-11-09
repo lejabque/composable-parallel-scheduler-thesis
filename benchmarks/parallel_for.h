@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 #define STR_(x) #x

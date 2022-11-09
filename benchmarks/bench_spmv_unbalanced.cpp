@@ -6,15 +6,14 @@
 using namespace SPMV;
 
 static void BM_SpmvBenchUnbalanced(benchmark::State &state) {
-  auto A =
-      GenSparseMatrix<SparseKind::UNBALANCED>(state.range(0), state.range(1),
-                                              1e-4); // TODO: density?
-  auto x = GenVector(state.range(1));
+  auto A = GenSparseMatrix<double, SparseKind::UNBALANCED>(
+      state.range(0), state.range(1),
+      1e-4); // TODO: density?
+  auto x = GenVector<double>(state.range(1));
   // allocate result only once
   std::vector<double> y(A.Dimensions.Rows);
   for (auto _ : state) {
-    ParallelFor(0, A.Dimensions.Rows,
-                [&](size_t i) { y[i] = MultiplyRow(A, x, i); });
+    MultiplyMatrix(A, x, y);
   }
 }
 

@@ -12,7 +12,7 @@ static void BM_ReduceBench(benchmark::State &state) {
   size_t size = state.range(0);
   auto blocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
   // allocate data and result once, reuse it for all iterations
-  auto data = SPMV::GenVector(size);
+  auto data = SPMV::GenVector<double>(size);
   std::vector<double> result(blocks);
 
   for (auto _ : state) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parallel_for.h"
+#include <cassert>
 #include <vector>
 
 namespace Scan {

@@ -47,6 +47,8 @@ inline int GetNumThreads() {
 #define TBB_AFFINITY 3
 #define TBB_CONST_AFFINITY 4
 
+// TODO: move out some initializations from body to avoid init overhead?
+
 template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #ifdef SERIAL
   for (size_t i = from; i < to; ++i) {

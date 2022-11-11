@@ -2,13 +2,15 @@ list(APPEND OMP_MODES OMP_STATIC OMP_DYNAMIC OMP_GUIDED OMP_RUNTIME)
 list(APPEND TBB_MODES TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY)
 # TODO: add rapid start proof of concept for TBB
 
-list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce bench_scan)
+list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce bench_scan bench_scheduling)
 
 foreach(bench IN LISTS BENCHMARKS)
     # serial
-    add_executable(${bench}_SERIAL ${bench}.cpp)
-    target_compile_definitions(${bench}_SERIAL PRIVATE SERIAL=1)
-    target_link_libraries(${bench}_SERIAL benchmark::benchmark)
+    if (NOT bench STREQUAL bench_scheduling)
+        add_executable(${bench}_SERIAL ${bench}.cpp)
+        target_compile_definitions(${bench}_SERIAL PRIVATE SERIAL=1)
+        target_link_libraries(${bench}_SERIAL benchmark::benchmark)
+    endif()
     # openmp
     foreach(mode IN LISTS OMP_MODES)
         add_executable(${bench}_${mode} ${bench}.cpp)

@@ -13,32 +13,41 @@ message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 include(FetchContent)
 
 # gtest
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.12.0
-)
+find_package(GTest QUIET)
+if(NOT GTEST_FOUND)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.12.0
+  )
+  FetchContent_MakeAvailable(googletest)
+endif()
+
 
 # benchmark
-FetchContent_Declare(googlebenchmark
-        GIT_REPOSITORY https://github.com/google/benchmark.git
-        GIT_TAG v1.7.0) # need master for benchmark::benchmark
-
-FetchContent_MakeAvailable(
-        googletest
-        googlebenchmark)
+find_package(benchmark QUIET)
+if(NOT benchmark_FOUND)
+  FetchContent_Declare(googlebenchmark
+          GIT_REPOSITORY https://github.com/google/benchmark.git
+          GIT_TAG v1.7.0) # need master for benchmark::benchmark
+  FetchContent_MakeAvailable(
+                  googlebenchmark)
+endif()
 
 find_package(OpenMP REQUIRED)
 
 # link with TBB
-FetchContent_Declare(
-  onetbb
-  GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
-  GIT_TAG v2021.6.0
-)
-option(TBB_TEST OFF)
+find_package(TBB QUIET)
+if(NOT TBB_FOUND)
+  FetchContent_Declare(
+    onetbb
+    GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
+    GIT_TAG v2021.6.0
+  )
+  option(TBB_TEST OFF)
+  FetchContent_MakeAvailable(onetbb)
+endif()
 
-FetchContent_MakeAvailable(onetbb)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
 

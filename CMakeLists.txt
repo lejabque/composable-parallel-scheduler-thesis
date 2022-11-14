@@ -4,6 +4,8 @@ project(composable-parallel-scheduler)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 
 # TODO: use clang instead of default compiler?
 message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")

@@ -1,14 +1,17 @@
 #include "parallel_for.h"
-#include <benchmark/benchmark.h>
+#include <algorithm>
+#include <chrono>
+#include <iostream>
 #include <mutex>
 #include <ratio>
-
-static constexpr size_t MIN_SIZE = 1;
-static constexpr size_t MAX_SIZE = 1 << 10;
+#include <thread>
+#include <vector>
 
 namespace {
 struct TimeReporter {
   // saves time of first report in current generation
+  // we need generations to reset times in all threads after each benchmark
+  // just incrementing generation
   void ReportTime(std::chrono::system_clock::time_point before) {
     if (reportedGen < totalGen) {
       auto now = std::chrono::system_clock::now();
@@ -44,22 +47,33 @@ private:
 
 static thread_local TimeReporter timeReporter;
 
-static void BM_Scheduling(benchmark::State &state) {
-  for (auto _ : state) {
-    auto start = std::chrono::high_resolution_clock::now();
-    ParallelFor(0, state.range(0),
-                [&](size_t i) { timeReporter.ReportTime(start); });
-    TimeReporter::totalGen++;
-    auto times = TimeReporter::GetTimes();
-    std::sort(times.begin(), times.end());
-    state.SetIterationTime(times.front().count() * 1e-9);
-    TimeReporter::Reset();
+int main(int argc, char **argv) {
+  auto start = std::chrono::high_resolution_clock::now();
+  auto threadNum = GetNumThreads();
+  if (argc > 1) {
+    threadNum = std::stoi(argv[1]);
   }
+  // TODO: configure number of tasks to be sure that all threads are used?
+  auto tasksNum = threadNum * 100;
+  auto totalBenchTime = std::chrono::duration<double>(60);
+  auto sleepFor = totalBenchTime * threadNum / tasksNum;
+  ParallelFor(0, tasksNum, [&](size_t i) {
+    timeReporter.ReportTime(start);
+    // sleep for emulating work
+    std::this_thread::sleep_for(sleepFor);
+  });
+  auto times = TimeReporter::GetTimes();
+  std::sort(times.begin(), times.end());
+  std::cout << "{";
+  std::cout << "\"thread_num\": " << threadNum << ", ";
+  std::cout << "\"used_threads\": " << times.size() << ", ";
+  std::cout << "\"start_times\": [";
+  for (size_t i = 0; i < times.size(); i++) {
+    std::cout << times[i].count();
+    if (i != times.size() - 1) {
+      std::cout << ", ";
+    }
+  }
+  std::cout << "]}" << std::endl;
+  return 0;
 }
-
-BENCHMARK(BM_Scheduling)
-    ->Name("Scheduling_" + GetParallelMode())
-    ->UseManualTime()
-    ->Range(MIN_SIZE, MAX_SIZE);
-
-BENCHMARK_MAIN();

@@ -11,7 +11,7 @@ clean:
 	rm -rf cmake-build-*
 
 clean_bench:
-	rm -f bench_results/*
+	rm -rf bench_results/*
 
 bench_dir:
 	mkdir -p bench_results

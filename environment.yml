@@ -1,12 +1,17 @@
 name: benchmarks
 channels:
-  - anaconda
   - conda-forge
-  - defaults
 dependencies:
-  - clang-tools>=14
-  - libstdcxx-ng
+  - make
   - cmake>=3.15
+  - libstdcxx-devel_linux-64
+  - gxx_linux-64 # C++ standard lib and gcc - https://docs.conda.io/projects/conda-build/en/latest/resources/compiler-tools.html
+  - clang-tools>=14
+  - clang>=14
+  - clangxx>=14
+  # - libclang-cpp
+  # - libcxx
+  - libstdcxx-ng
   - llvm-openmp
   - gmock
   - gtest

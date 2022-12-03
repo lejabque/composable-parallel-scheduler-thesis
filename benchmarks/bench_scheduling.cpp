@@ -47,15 +47,11 @@ private:
 
 static thread_local TimeReporter timeReporter;
 
-int main(int argc, char **argv) {
+static std::vector<std::chrono::nanoseconds> runOnce(size_t threadNum) {
   auto start = std::chrono::high_resolution_clock::now();
-  auto threadNum = GetNumThreads();
-  if (argc > 1) {
-    threadNum = std::stoi(argv[1]);
-  }
   // TODO: configure number of tasks to be sure that all threads are used?
   auto tasksNum = threadNum * 100;
-  auto totalBenchTime = std::chrono::duration<double>(60);
+  auto totalBenchTime = std::chrono::duration<double>(1);
   auto sleepFor = totalBenchTime * threadNum / tasksNum;
   ParallelFor(0, tasksNum, [&](size_t i) {
     timeReporter.ReportTime(start);
@@ -63,14 +59,33 @@ int main(int argc, char **argv) {
     std::this_thread::sleep_for(sleepFor);
   });
   auto times = TimeReporter::GetTimes();
+  TimeReporter::Reset();
   std::sort(times.begin(), times.end());
+  return times;
+}
+
+int main(int argc, char **argv) {
+  auto threadNum = GetNumThreads();
+  if (argc > 1) {
+    threadNum = std::stoi(argv[1]);
+  }
+  runOnce(threadNum); // just for warmup
+
+  size_t repeat = 20;
+  std::vector<std::chrono::nanoseconds> result(threadNum);
+  for (size_t i = 0; i < repeat; i++) {
+    auto times = runOnce(threadNum);
+    for (size_t j = 0; j < threadNum; j++) {
+      result[j] += times[j];
+    }
+  }
   std::cout << "{";
   std::cout << "\"thread_num\": " << threadNum << ", ";
-  std::cout << "\"used_threads\": " << times.size() << ", ";
+  std::cout << "\"used_threads\": " << result.size() << ", ";
   std::cout << "\"start_times\": [";
-  for (size_t i = 0; i < times.size(); i++) {
-    std::cout << times[i].count();
-    if (i != times.size() - 1) {
+  for (size_t i = 0; i < result.size(); i++) {
+    std::cout << result[i].count() / repeat;
+    if (i != result.size() - 1) {
       std::cout << ", ";
     }
   }

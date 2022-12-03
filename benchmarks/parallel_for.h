@@ -21,20 +21,20 @@ inline std::string GetParallelMode() {
 #include "oneapi/tbb/blocked_range.h"
 #include <tbb/parallel_for.h>
 #endif
+#ifdef OMP_MODE
+#include <omp.h>
+#endif
 #include <cstddef>
 #include <thread>
 
 inline int GetNumThreads() {
-  // TODO: support have_tbb, have_omp
-  // #ifdef TBB_MODE
-  //   return ::tbb::info::
-  //       default_concurrency(); // tbb::this_task_arena::max_concurrency();
-  // #elif defined OMP_MODE
-  //   return omp_get_max_threads();
-  // #else
-  //   return std::thread::hardware_concurrency();
-  // #endif
-  return std::thread::hardware_concurrency();
+#ifdef TBB_MODE
+  return ::tbb::info::
+      default_concurrency(); // tbb::this_task_arena::max_concurrency();
+#endif
+#ifdef OMP_MODE
+  return omp_get_max_threads();
+#endif
 }
 
 #define OMP_STATIC 1

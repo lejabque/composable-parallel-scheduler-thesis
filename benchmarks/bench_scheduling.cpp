@@ -1,9 +1,8 @@
 #include "parallel_for.h"
 #include <algorithm>
-#include <chrono>
+#include <atomic>
 #include <iostream>
 #include <mutex>
-#include <ratio>
 #include <thread>
 #include <vector>
 
@@ -20,39 +19,35 @@ static uint64_t Now() {
 }
 
 struct TimeReporter {
-  // saves time of first report in current generation
-  // we need generations to reset times in all threads after each benchmark
-  // just incrementing generation
+  // saves time of first report in current epoch
+  // we need epochs to reset times in all threads after each benchmark
+  // just incrementing epoch
   void ReportTime(uint64_t before) {
     auto duration = Now() - before;
-    if (reportedGen < totalGen) {
-      // lock is aquired only once per generation
-      // so it doesn't affect result performance
+    if (reportedEpoch < currentEpoch) {
+      // lock is aquired only once per epoch
+      // so it doesn't affect measurements
       std::lock_guard<std::mutex> lock(mutex);
       times.push_back(duration);
-      reportedGen = totalGen;
+      reportedEpoch = currentEpoch;
     }
   }
 
-  static std::vector<uint64_t> GetTimes() {
+  static std::vector<uint64_t> EndEpoch() {
+    std::vector<uint64_t> res;
     std::lock_guard<std::mutex> lock(mutex);
-    return times;
+    res.swap(times);
+    currentEpoch++;
+    return res;
   }
-
-  static void Reset() {
-    std::lock_guard<std::mutex> lock(mutex);
-    times.clear();
-    totalGen++;
-  }
-
-  static inline size_t totalGen = 1;
 
 private:
-  size_t reportedGen = 0;
+  size_t reportedEpoch = 0;
 
   // common for all threads
   static inline std::mutex mutex;
   static inline std::vector<uint64_t> times; // nanoseconds
+  static inline std::atomic<size_t> currentEpoch = 1;
 };
 } // namespace
 
@@ -69,8 +64,7 @@ static std::vector<uint64_t> runOnce(size_t threadNum) {
     // sleep for emulating work
     std::this_thread::sleep_for(sleepFor);
   });
-  auto times = TimeReporter::GetTimes();
-  TimeReporter::Reset();
+  auto times = TimeReporter::EndEpoch();
   std::sort(times.begin(), times.end());
   return times;
 }

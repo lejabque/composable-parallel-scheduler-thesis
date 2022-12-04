@@ -43,6 +43,10 @@ if(NOT benchmark_FOUND)
 endif()
 
 find_package(OpenMP REQUIRED)
+# TODO
+# if(NOT OPENMP_STANDALONE_BUILD)
+#   message(FATAL_ERROR "OpenMP not from llvm used")
+# endif()
 
 # link with TBB
 find_package(TBB QUIET)

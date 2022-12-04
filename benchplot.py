@@ -63,11 +63,16 @@ def plot_scheduling_benchmarks(scheduling_times):
     # x for thread_idx, y for time
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     for bench_type, times in reversed(sorted(scheduling_times.items(), key=lambda x: max(x[1]))):
-        print(bench_type, times)
-        ax.plot(range(len(times)), times, label=bench_type)
+        # mean time per thread for each idx in range of thread count
+        times = np.asarray(times)
+        means = np.mean(times, axis=0)
+        stds = np.std(times, axis=0)
+        print(bench_type, means, stds)
+        # TODO: plot stds
+        ax.plot(range(len(means)), means, label=bench_type)
     ax.set_title("Scheduling time")
     ax.set_xlabel("Index of thread")
-    ax.set_ylabel("Time, us")
+    ax.set_ylabel("Clock ticks")
     ax.legend()
     return fig
 
@@ -88,18 +93,14 @@ if __name__ == "__main__":
     # plot scheduling benchmarks
     scheduling_times = {}
     for bench_type, res in scheduling_bench.items():
-        # print thread num, used threads
-        print(bench_type, res["thread_num"], res["used_threads"])
-        if res["thread_num"] != res["used_threads"]:
-            print(f"Maybe something went wrong with {bench_type}: not all threads were used")
-        scheduling_times[bench_type] = [x/1e3 for x in res["start_times"]]
+        scheduling_times[bench_type] = res["results"]
 
     fig = plot_scheduling_benchmarks(scheduling_times)
     fig.savefig(os.path.join(res_path, 'scheduling_time.png'))
 
     # plot average scheduling time for all benchs
-    avg_times = {}
-    for bench_type, times in scheduling_times.items():
-        avg_times[bench_type.split("_", 2)[-1]] = sum(times) / len(times)
-    fig = plot_benchmark(avg_times, "average scheduling time")
-    fig.savefig(os.path.join(res_path, 'avg_scheduling_time.png'))
+    # avg_times = {}
+    # for bench_type, times in scheduling_times.items():
+    #     avg_times[bench_type.split("_", 2)[-1]] = sum(times) / len(times)
+    # fig = plot_benchmark(avg_times, "average scheduling time")
+    # fig.savefig(os.path.join(res_path, 'avg_scheduling_time.png'))

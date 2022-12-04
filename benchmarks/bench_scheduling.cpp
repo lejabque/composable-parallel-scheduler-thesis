@@ -1,6 +1,8 @@
 #include "parallel_for.h"
 #include <algorithm>
 #include <atomic>
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <mutex>
 #include <thread>
@@ -64,23 +66,29 @@ static std::vector<uint64_t> runOnce(size_t threadNum) {
     // sleep for emulating work
     std::this_thread::sleep_for(sleepFor);
   });
-  auto times = TimeReporter::EndEpoch();
-  std::sort(times.begin(), times.end());
-  return times;
+  return TimeReporter::EndEpoch();
 }
 
-static void printTimes(size_t threadNum, const std::vector<uint64_t> &result) {
+static void printTimes(size_t threadNum,
+                       const std::vector<std::vector<uint64_t>> &result) {
   std::cout << "{";
   std::cout << "\"thread_num\": " << threadNum << ", ";
-  std::cout << "\"used_threads\": " << result.size() << ", ";
-  std::cout << "\"start_times\": [";
-  for (size_t i = 0; i < result.size(); i++) {
-    std::cout << result[i];
+  std::cout << "\"results\": [";
+  for (size_t i = 0; i < result.size(); ++i) {
+    std::cout << "[";
+    for (size_t j = 0; j < result[i].size(); ++j) {
+      std::cout << result[i][j];
+      if (j != result[i].size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << "]";
     if (i != result.size() - 1) {
       std::cout << ", ";
     }
   }
-  std::cout << "]}" << std::endl;
+  std::cout << "]";
+  std::cout << "}" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -91,16 +99,12 @@ int main(int argc, char **argv) {
   runOnce(threadNum); // just for warmup
 
   size_t repeat = 20;
-  std::vector<uint64_t> result(threadNum);
+  std::vector<std::vector<uint64_t>> results;
   for (size_t i = 0; i < repeat; i++) {
     auto times = runOnce(threadNum);
-    for (size_t j = 0; j < threadNum; j++) {
-      result[j] += times[j];
-    }
+    std::sort(times.begin(), times.end());
+    results.push_back(times);
   }
-  for (size_t j = 0; j < threadNum; j++) {
-    result[j] /= repeat;
-  }
-  printTimes(threadNum, result);
+  printTimes(threadNum, results);
   return 0;
 }

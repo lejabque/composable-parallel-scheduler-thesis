@@ -62,7 +62,8 @@ def parse_benchmarks(folder_name):
 def plot_scheduling_benchmarks(scheduling_times):
     # x for thread_idx, y for time
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    for bench_type, times in reversed(sorted(scheduling_times.items(), key=lambda x: max(x[1]))):
+    for bench_type, times in reversed(sorted(scheduling_times.items(),
+                                 key=lambda x: np.max(np.mean(np.asarray(x[1]), axis=0)))):
         # mean time per thread for each idx in range of thread count
         times = np.asarray(times)
         means = np.mean(times, axis=0)
@@ -95,8 +96,18 @@ if __name__ == "__main__":
     for bench_type, res in scheduling_bench.items():
         scheduling_times[bench_type] = res["results"]
 
-    fig = plot_scheduling_benchmarks(scheduling_times)
-    fig.savefig(os.path.join(res_path, 'scheduling_time.png'))
+    # plot with and without barrier
+    # group scheduling_times by suffix
+    scheduling_times_by_suffix = {}
+    for bench_type, times in scheduling_times.items():
+        bench_type, measure_mode = bench_type.rsplit("_", 1)
+        if measure_mode not in scheduling_times_by_suffix:
+            scheduling_times_by_suffix[measure_mode] = {}
+        scheduling_times_by_suffix[measure_mode][bench_type] = times
+
+    for measure_mode, times in scheduling_times_by_suffix.items():
+        fig = plot_scheduling_benchmarks(times)
+        fig.savefig(os.path.join(res_path, "scheduling_" + measure_mode + '.png'))
 
     # plot average scheduling time for all benchs
     # avg_times = {}

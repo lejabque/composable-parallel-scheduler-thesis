@@ -87,15 +87,14 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #endif
 
 #ifdef OMP_MODE
-  // TODO: customize num of threads
-  size_t g = GetNumThreads();
 #pragma omp parallel
 #if OMP_MODE == OMP_STATIC
 #pragma omp for nowait schedule(static)
 #elif OMP_MODE == OMP_DYNAMIC
-#pragma omp for nowait schedule(dynamic, g)
+// TODO: chunk size?
+#pragma omp for nowait schedule(dynamic)
 #elif OMP_MODE == OMP_GUIDED
-#pragma omp for nowait schedule(guided, g)
+#pragma omp for nowait schedule(guided)
 #elif OMP_MODE == OMP_RUNTIME
 #pragma omp for nowait schedule(runtime)
 #else

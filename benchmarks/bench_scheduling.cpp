@@ -2,11 +2,16 @@
 #include <algorithm>
 #include <atomic>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <mutex>
 #include <thread>
 #include <vector>
+
+#define WAITING 1
+#define BARRIER 2
+#define RUNNING 3
 
 namespace {
 
@@ -57,7 +62,37 @@ static thread_local TimeReporter timeReporter;
 
 static std::vector<uint64_t> runOnce(size_t threadNum) {
   auto start = Now();
-  // TODO: configure number of tasks to be sure that all threads are used?
+#if SCHEDULING_MEASURE_MODE == BARRIER
+  std::atomic<size_t> reported = 0;
+  std::vector<uint64_t> times(threadNum);
+  std::mutex timesMutex;
+  ParallelFor(0, threadNum, [&](size_t i) {
+    auto now = Now();
+    auto id = reported.fetch_add(1);
+    {
+      // lock is aquired after time measurement
+      // so we are not afraid of performance loss
+      std::lock_guard<std::mutex> lock(timesMutex);
+      times[id] = now - start;
+    }
+    // it's ok to block here because we want
+    // to measure time of all threadNum threads
+    while (reported.load() != threadNum) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+  });
+  std::lock_guard<std::mutex> lock(timesMutex);
+  return times;
+#endif
+#if SCHEDULING_MEASURE_MODE == WAITING
+  ParallelFor(0, threadNum, [&](size_t i) {
+    timeReporter.ReportTime(start);
+    // sleep for emulating work
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  });
+  return TimeReporter::EndEpoch();
+#endif
+#if SCHEDULING_MEASURE_MODE == MULTITASK
   auto tasksNum = threadNum * 100;
   auto totalBenchTime = std::chrono::duration<double>(1);
   auto sleepFor = totalBenchTime * threadNum / tasksNum;
@@ -67,6 +102,7 @@ static std::vector<uint64_t> runOnce(size_t threadNum) {
     std::this_thread::sleep_for(sleepFor);
   });
   return TimeReporter::EndEpoch();
+#endif
 }
 
 static void printTimes(size_t threadNum,

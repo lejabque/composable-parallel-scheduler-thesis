@@ -7,6 +7,9 @@ release_benchmarks:
 release_scheduling:
 	cd scheduling_time && cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -C cmake-build-release -j$(shell nproc)
 
+release_scheduling_dist:
+	cd scheduling_dist && cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -C cmake-build-release -j$(shell nproc)
+
 debug_benchmarks:
 	cd benchmarks && cmake -B cmake-build-debug -S . -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && make -C cmake-build-debug -j$(shell nproc)
 
@@ -40,6 +43,9 @@ bench_scan:
 
 bench_scheduling:
 	@for x in $(shell ls -1 scheduling_time/cmake-build-release/bench_scheduling_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; scheduling_time/cmake-build-release/$$x > bench_results/$$x.json; done
+
+run_scheduling_dist:
+	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; scheduling_dist/cmake-build-release/$$x > bench_results/$$x.json; done
 
 bench: clean_bench bench_dir release_benchmarks release_scheduling bench_spmv bench_reduce bench_scan bench_scheduling
 

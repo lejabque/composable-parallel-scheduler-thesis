@@ -31,32 +31,29 @@ def plot_benchmark(benchmarks, title):
 
 
 def parse_benchmarks(folder_name):
-    benchmarks = {}
-    scheduling_bench = {}
-    for bench_file in os.listdir(folder_name):
-        if bench_file.endswith('.json'):
-            with open(os.path.join(folder_name, bench_file)) as f:
-                bench = json.load(f)
-                name = bench_file.split(".")[0]
-                # TODO: take not only last bench
-                if "benchmarks" in bench:
-                    res = bench["benchmarks"][-1]
-                    if "real_time" in res:
-                        benchmarks[name] = res["real_time"]
-                    elif "manual_time" in res:
-                        benchmarks[name] = res["manual_time"]
-                    elif "cpu_time" in res:
-                        benchmarks[name] = res["cpu_time"]
-                elif name.startswith("bench_scheduling"):
-                    scheduling_bench[name] = bench
     benchmarks_by_type = {}
-
-    for name, bench in benchmarks.items():
-        bench_type, bench_mode = split_bench_name(name)
-        if bench_type not in benchmarks_by_type:
-            benchmarks_by_type[bench_type] = {}
-        benchmarks_by_type[bench_type][bench_mode] = bench
-    return benchmarks_by_type, scheduling_bench
+    for bench_file in os.listdir(folder_name):
+        if not bench_file.endswith('.json'):
+            continue
+        with open(os.path.join(folder_name, bench_file)) as f:
+            bench = json.load(f)
+            name = bench_file.split(".")[0]
+            bench_type, bench_mode = split_bench_name(name)
+            if bench_type not in benchmarks_by_type:
+                benchmarks_by_type[bench_type] = {}
+            if "benchmarks" in bench:
+                # TODO: take not only last bench
+                res = bench["benchmarks"][-1]
+                if "real_time" in res:
+                    report = res["real_time"]
+                elif "manual_time" in res:
+                    report = res["manual_time"]
+                elif "cpu_time" in res:
+                    report = res["cpu_time"]
+                benchmarks_by_type[bench_type][bench_mode] = report
+            else:
+                benchmarks_by_type[bench_type][bench_mode] = bench
+    return benchmarks_by_type
 
 
 def plot_scheduling_benchmarks(scheduling_times):
@@ -78,36 +75,51 @@ def plot_scheduling_benchmarks(scheduling_times):
     return fig
 
 
+def plot_scheduling_dist(scheduling_dist):
+    # plot heatmap for map of thread_idx -> tasks list
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    ax.set_title("Scheduling distribution")
+    ax.set_ylabel("Index of thread")
+    ax.set_xlabel("Index of task")
+    thread_count = len(scheduling_dist)
+    task_count = max(max(tasks) for tasks in scheduling_dist.values()) + 1
+    data = np.ones((thread_count, task_count))
+    total = 0
+    for _, tasks in scheduling_dist.items():
+        for task_idx in tasks:
+            data[total, task_idx] = 0
+        total += 1
+    ax.imshow(data, cmap='gray')
+    return fig
+
+
 if __name__ == "__main__":
     # fetch folder from args or use current folder
     folder_name = sys.argv[1] if len(sys.argv) > 1 else "bench_results"
-    benchmarks_by_type, scheduling_bench = parse_benchmarks(folder_name)
+    benchmarks = parse_benchmarks(folder_name)
     res_path = os.path.join(folder_name, "images")
     if not os.path.exists(res_path):
         os.makedirs(res_path)
 
     # plot main benchmarks
-    for bench_type, bench in benchmarks_by_type.items():
+    for bench_type, bench in benchmarks.items():
+        if not bench_type.startswith("bench") or bench_type.startswith("bench_scheduling"):
+            continue
         fig = plot_benchmark(bench, bench_type)
         fig.savefig(os.path.join(res_path, bench_type + '.png'))
-
-    # plot scheduling benchmarks
-    scheduling_times = {}
-    for bench_type, res in scheduling_bench.items():
-        scheduling_times[bench_type] = res["results"]
 
     # plot with and without barrier
     # group scheduling_times by suffix
     scheduling_times_by_suffix = {}
-    for bench_type, times in scheduling_times.items():
-        bench_type, measure_mode = bench_type.rsplit("_", 1)
+    for bench_mode, res in benchmarks["bench_scheduling"].items():
+        bench_mode, measure_mode = bench_mode.rsplit("_", 1)
         if measure_mode not in scheduling_times_by_suffix:
             scheduling_times_by_suffix[measure_mode] = {}
-        scheduling_times_by_suffix[measure_mode][bench_type] = times
+        scheduling_times_by_suffix[measure_mode][bench_mode] = res["results"]
 
     for measure_mode, times in scheduling_times_by_suffix.items():
         fig = plot_scheduling_benchmarks(times)
-        fig.savefig(os.path.join(res_path, "scheduling_" + measure_mode + '.png'))
+        fig.savefig(os.path.join(res_path, "scheduling_time_" + measure_mode + '.png'))
 
     # plot average scheduling time for all benchs
     # avg_times = {}
@@ -115,3 +127,11 @@ if __name__ == "__main__":
     #     avg_times[bench_type.split("_", 2)[-1]] = sum(times) / len(times)
     # fig = plot_benchmark(avg_times, "average scheduling time")
     # fig.savefig(os.path.join(res_path, 'avg_scheduling_time.png'))
+
+    # plot scheduling dist
+    for bench_mode, res in benchmarks["scheduling_dist"].items():
+        bench_mode, measure_mode = bench_mode.rsplit("_", 1)
+        fig = plot_scheduling_dist(res["results"])
+        fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'))
+
+

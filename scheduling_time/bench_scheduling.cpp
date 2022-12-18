@@ -1,4 +1,5 @@
 #include "../include/parallel_for.h"
+#include "../include/time_logger.h"
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -13,65 +14,20 @@
 #define BARRIER 2
 #define RUNNING 3
 
-namespace {
+static thread_local TimeLogger timeLogger;
 
-static uint64_t Now() {
-#ifdef __x86_64__
-  return __rdtsc();
-#elif __arm__
-  uint64_t val;
-  asm volatile("mrs %0, cntvct_el0" : "=r"(val));
-  return val;
-#endif
-}
-
-struct TimeReporter {
-  // saves time of first report in current epoch
-  // we need epochs to reset times in all threads after each benchmark
-  // just incrementing epoch
-  void ReportTime(uint64_t result) {
-    if (reportedEpoch < currentEpoch) {
-      // lock is aquired only once per epoch
-      // so it doesn't affect measurements
-      std::lock_guard<std::mutex> lock(mutex);
-      times.push_back(result);
-      reportedEpoch = currentEpoch;
-    }
-  }
-
-  static std::vector<uint64_t> EndEpoch() {
-    std::vector<uint64_t> res;
-    std::lock_guard<std::mutex> lock(mutex);
-    res.swap(times);
-    currentEpoch++;
-    return res;
-  }
-
-private:
-  size_t reportedEpoch = 0;
-
-  // common for all threads
-  static inline std::mutex mutex;
-  static inline std::vector<uint64_t> times; // nanoseconds
-  static inline std::atomic<size_t> currentEpoch = 1;
-};
-} // namespace
-
-static thread_local TimeReporter timeReporter;
-
-static std::vector<uint64_t> runOnce(size_t threadNum) {
+static std::vector<uint64_t> RunWithBarrier(size_t threadNum) {
   auto start = Now();
-#if SCHEDULING_MEASURE_MODE == BARRIER
-  std::atomic<size_t> reported = 0;
+  std::atomic<size_t> reported(0);
   std::vector<uint64_t> times;
   times.reserve(threadNum);
-  std::mutex timesMutex;
+  SpinLock timeslock;
   ParallelFor(0, threadNum, [&](size_t i) {
     auto resultTime = Now() - start;
     {
       // lock is aquired after time measurement
       // so we are not afraid of performance loss
-      std::lock_guard<std::mutex> lock(timesMutex);
+      std::lock_guard<SpinLock> lock(timeslock);
       times.push_back(resultTime);
     }
     reported.fetch_add(1);
@@ -81,37 +37,68 @@ static std::vector<uint64_t> runOnce(size_t threadNum) {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   });
-  std::lock_guard<std::mutex> lock(timesMutex);
+  std::lock_guard<SpinLock> lock(timeslock);
   return times;
-#endif
-#if SCHEDULING_MEASURE_MODE == SLEEP
+}
+
+static std::vector<uint64_t> RunWithSleep(size_t threadNum) {
+  auto start = Now();
   std::vector<uint64_t> times;
   times.reserve(threadNum);
-  std::mutex timesMutex;
+  SpinLock timeslock;
   ParallelFor(0, threadNum, [&](size_t i) {
     auto resultTime = Now() - start;
     {
       // lock is aquired after time measurement
       // so we are not afraid of performance loss
-      std::lock_guard<std::mutex> lock(timesMutex);
+      std::lock_guard<SpinLock> lock(timeslock);
       times.push_back(resultTime);
     }
-    // sleep for emulating work
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // spin 1 seconds without sleep
+    auto spinStart = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - spinStart <
+           std::chrono::seconds(1)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    // TODO: kmp block time here? maybe spin 1 second without sleep?
   });
-  std::lock_guard<std::mutex> lock(timesMutex);
+  std::lock_guard<SpinLock> lock(timeslock);
   return times;
-#endif
-#if SCHEDULING_MEASURE_MODE == MULTITASK
+}
+
+static std::vector<uint64_t> RunMultitask(size_t threadNum) {
+  auto start = Now();
   auto tasksNum = threadNum * 100;
   auto totalBenchTime = std::chrono::duration<double>(1);
   auto sleepFor = totalBenchTime * threadNum / tasksNum;
   ParallelFor(0, tasksNum, [&](size_t i) {
-    timeReporter.ReportTime(Now() - start);
+    timeLogger.ReportTime(Now() - start);
     // sleep for emulating work
     std::this_thread::sleep_for(sleepFor);
   });
-  return TimeReporter::EndEpoch();
+  return TimeLogger::EndEpoch();
+}
+
+static std::vector<uint64_t> RunOnce(size_t threadNum) {
+  // todo: mfence here?
+  /*
+  for arm:
+  asm volatile(
+        "DMB SY \n"  Data Memory Barrier. Full runtime operation.
+        "DSB SY \n"  Data Synchronization Barrier. Full runtime operation.
+        "ISB    \n"  Instruction Synchronization Barrier.
+        ::: "memory"
+        );
+  */
+
+#if SCHEDULING_MEASURE_MODE == BARRIER
+  return RunWithBarrier(threadNum);
+#endif
+#if SCHEDULING_MEASURE_MODE == SLEEP
+  return RunWithSleep(threadNum);
+#endif
+#if SCHEDULING_MEASURE_MODE == MULTITASK
+  return RunMultitask(threadNum);
 #endif
 }
 
@@ -142,12 +129,12 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     threadNum = std::stoi(argv[1]);
   }
-  runOnce(threadNum); // just for warmup
+  RunOnce(threadNum); // just for warmup
 
-  size_t repeat = 20;
+  size_t repeat = 5;
   std::vector<std::vector<uint64_t>> results;
   for (size_t i = 0; i < repeat; i++) {
-    auto times = runOnce(threadNum);
+    auto times = RunOnce(threadNum);
     std::sort(times.begin(), times.end());
     results.push_back(times);
   }

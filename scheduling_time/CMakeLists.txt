@@ -34,29 +34,20 @@ endif()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
 
-
-# build options
-option(USE_SANITIZERS "Enable to build with undefined,leak and address sanitizers" OFF)
-
-
 # benchmarks:
-
 list(APPEND OMP_MODES OMP_STATIC OMP_DYNAMIC OMP_GUIDED OMP_RUNTIME)
 list(APPEND TBB_MODES TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY)
-list(APPEND SCHEDULING_MEASURE_MODES SLEEP BARRIER MULTITASK)
 
 # openmp
-foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
-    foreach(mode IN LISTS OMP_MODES)
-        add_executable(bench_scheduling_${mode}_${scheduling_measure_mode} bench_scheduling.cpp)
-        target_compile_definitions(bench_scheduling_${mode}_${scheduling_measure_mode} PRIVATE OMP_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
-        target_link_libraries(bench_scheduling_${mode}_${scheduling_measure_mode} OpenMP::OpenMP_CXX)
-    endforeach()
-    # tbb
-    foreach(mode IN LISTS TBB_MODES)
-        add_executable(bench_scheduling_${mode}_${scheduling_measure_mode} bench_scheduling.cpp)
-        target_compile_definitions(bench_scheduling_${mode}_${scheduling_measure_mode} PRIVATE TBB_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
-        target_link_libraries(bench_scheduling_${mode}_${scheduling_measure_mode} TBB::tbb)
-    endforeach()
+foreach(mode IN LISTS OMP_MODES)
+  add_executable(bench_scheduling_${mode}_${scheduling_measure_mode} bench_scheduling.cpp)
+  target_compile_definitions(bench_scheduling_${mode}_${scheduling_measure_mode} PRIVATE OMP_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
+  target_link_libraries(bench_scheduling_${mode}_${scheduling_measure_mode} OpenMP::OpenMP_CXX)
+endforeach()
+# tbb
+foreach(mode IN LISTS TBB_MODES)
+  add_executable(bench_scheduling_${mode}_${scheduling_measure_mode} bench_scheduling.cpp)
+  target_compile_definitions(bench_scheduling_${mode}_${scheduling_measure_mode} PRIVATE TBB_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
+  target_link_libraries(bench_scheduling_${mode}_${scheduling_measure_mode} TBB::tbb)
 endforeach()
 

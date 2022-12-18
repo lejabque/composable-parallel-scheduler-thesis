@@ -13,8 +13,10 @@ release_scheduling_dist:
 debug_benchmarks:
 	cd benchmarks && cmake -B cmake-build-debug -S . -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && make -C cmake-build-debug -j$(shell nproc)
 
+release: release_benchmarks release_scheduling release_scheduling_dist
+
 clean:
-	rm -rf cmake-build-* benchmarks/cmake-build-* scheduling_time/cmake-build-*
+	rm -rf cmake-build-* benchmarks/cmake-build-* scheduling_time/cmake-build-* scheduling_dist/cmake-build-*
 
 clean_bench:
 	rm -rf bench_results/*
@@ -47,7 +49,7 @@ bench_scheduling:
 run_scheduling_dist:
 	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; scheduling_dist/cmake-build-release/$$x > bench_results/$$x.json; done
 
-bench: clean_bench bench_dir release_benchmarks release_scheduling bench_spmv bench_reduce bench_scan bench_scheduling
+bench: clean_bench bench_dir release_benchmarks release_scheduling bench_spmv bench_reduce bench_scan bench_scheduling run_scheduling_dist
 
 bench_tests:
 	@for x in $(shell ls -1 benchmarks/cmake-build-debug/tests/*tests* | xargs -n 1 basename | sort ) ; do numactl -N 0 benchmarks/cmake-build-release/tests/$$x; done

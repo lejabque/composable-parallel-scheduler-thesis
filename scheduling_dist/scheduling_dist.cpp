@@ -1,13 +1,25 @@
 #include "../include/parallel_for.h"
 #include "../include/thread_logger.h"
 
+#include <chrono>
 #include <iostream>
 #include <unordered_map>
+
+#define SLEEP 1
+#define BARRIER 2
+#define RUNNING 3
 
 static std::vector<ThreadLogger::ThreadId> RunOnce(size_t threadNum,
                                                    size_t tasksNum) {
   ThreadLogger logger(tasksNum);
-  ParallelFor(0, tasksNum, [&](size_t i) { logger.Log(i); });
+  ParallelFor(0, tasksNum, [&](size_t i) {
+    logger.Log(i);
+    // spin 10ms without sleep
+    auto spinStart = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - spinStart <
+           std::chrono::milliseconds(10)) {
+    }
+  });
   return logger.GetIds();
 }
 

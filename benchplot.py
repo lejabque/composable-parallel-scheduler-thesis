@@ -36,6 +36,7 @@ def parse_benchmarks(folder_name):
         if not bench_file.endswith('.json'):
             continue
         with open(os.path.join(folder_name, bench_file)) as f:
+            print(bench_file)
             bench = json.load(f)
             name = bench_file.split(".")[0]
             bench_type, bench_mode = split_bench_name(name)
@@ -130,7 +131,6 @@ if __name__ == "__main__":
 
     # plot scheduling dist
     for bench_mode, res in benchmarks["scheduling_dist"].items():
-        bench_mode, measure_mode = bench_mode.rsplit("_", 1)
         fig = plot_scheduling_dist(res["results"])
         fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'))
 

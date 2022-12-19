@@ -37,14 +37,13 @@ inline int GetNumThreads() {
 #endif
 }
 
-#define OMP_STATIC_MONOTONIC 1
-#define OMP_STATIC_NONMONOTONIC 2
-#define OMP_DYNAMIC_MONOTONIC 3
-#define OMP_DYNAMIC_NONMONOTONIC 4
-#define OMP_GUIDED_MONOTONIC 5
-#define OMP_GUIDED_NONMONOTONIC 6
-#define OMP_RUNTIME_MONOTONIC 7
-#define OMP_RUNTIME_NONMONOTONIC 8
+#define OMP_STATIC 1
+#define OMP_DYNAMIC_MONOTONIC 2
+#define OMP_DYNAMIC_NONMONOTONIC 3
+#define OMP_GUIDED_MONOTONIC 4
+#define OMP_GUIDED_NONMONOTONIC 5
+#define OMP_RUNTIME_MONOTONIC 6
+#define OMP_RUNTIME_NONMONOTONIC 7
 
 #define TBB_SIMPLE 1
 #define TBB_AUTO 2
@@ -92,10 +91,8 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 
 #ifdef OMP_MODE
 #pragma omp parallel
-#if OMP_MODE == OMP_STATIC_MONOTONIC
-#pragma omp for nowait schedule(monotonic : static)
-#elif OMP_MODE == OMP_STATIC_NONMONOTONIC
-#pragma omp for nowait schedule(nonmonotonic : static)
+#if OMP_MODE == OMP_STATIC
+#pragma omp for nowait schedule(static)
 #elif OMP_MODE == OMP_DYNAMIC_MONOTONIC
 // TODO: chunk size?
 #pragma omp for nowait schedule(monotonic : dynamic)

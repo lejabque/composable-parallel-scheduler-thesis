@@ -38,7 +38,6 @@ static std::vector<uint64_t> RunWithBarrier(size_t threadNum) {
     }
   });
   std::lock_guard<SpinLock> lock(timeslock);
-  std::cout << "all threads started" << std::endl;
   return times;
 }
 

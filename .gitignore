@@ -19,3 +19,5 @@ cmake_install.cmake
 
 # benchmarks
 bench_results/*.json
+
+sandbox/

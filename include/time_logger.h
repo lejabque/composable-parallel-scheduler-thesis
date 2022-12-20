@@ -8,7 +8,8 @@
 inline uint64_t Now() {
 #ifdef __x86_64__
   return __rdtsc();
-#elif __arm__
+#endif
+#ifdef __aarch64__
   uint64_t val;
   asm volatile("mrs %0, cntvct_el0" : "=r"(val));
   return val;

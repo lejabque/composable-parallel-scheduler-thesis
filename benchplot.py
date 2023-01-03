@@ -61,11 +61,16 @@ def parse_benchmarks(folder_name):
 def plot_scheduling_benchmarks(scheduling_times):
     # x for thread_idx, y for time
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    for bench_type, times in reversed(sorted(scheduling_times.items(),
+    min_times = [(bench_type, [[min([t["time"] for t in times]) for times in iter.values()] for iter in results]) for bench_type, results in scheduling_times.items()]
+    # print(list(scheduling_times.items())[0][1][0])
+    # items = [(bench_type, [[t["time"] for t in iter.values()] for iter in tasks]) for bench_type, tasks in scheduling_times.items()]
+    for bench_type, times in reversed(sorted(min_times,
                                  key=lambda x: np.max(np.mean(np.asarray(x[1]), axis=0)))):
         # mean time per thread for each idx in range of thread count
         times = np.asarray(times)
         means = np.mean(times, axis=0)
+        # sort means array
+        means = np.sort(means, axis=0)
         stds = np.std(times, axis=0)
         print(bench_type, means, stds)
         # TODO: plot stds
@@ -83,8 +88,7 @@ def plot_scheduling_dist(scheduling_dist):
     fig = plt.figure(figsize=(10, 15))
     fig.suptitle("Scheduling distribution")
     fig.tight_layout()
-    gs = GridSpec(row_count, 1, figure=fig)
-
+    gs = GridSpec(row_count, 2, figure=fig)
 
     for iter in range(row_count):
         ax = fig.add_subplot(gs[iter, 0])
@@ -97,10 +101,12 @@ def plot_scheduling_dist(scheduling_dist):
         data = np.ones((thread_count, task_count))
         total = 0
         for _, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
-            for scheduled_task in tasks:
-                data[total, scheduled_task["index"]] = 0
+            max_time = max(t["time"] for t in tasks)
+            for t in tasks:
+                data[total, t["index"]] = 1 - t["time"] / max_time
             total += 1
         ax.imshow(data, cmap='gray', origin='lower')
+
     return fig
 
 
@@ -122,7 +128,7 @@ if __name__ == "__main__":
     # plot with and without barrier
     # group scheduling_times by suffix
     scheduling_times_by_suffix = {}
-    for bench_mode, res in benchmarks["bench_scheduling"].items():
+    for bench_mode, res in benchmarks["scheduling_dist"].items():
         bench_mode, measure_mode = bench_mode.rsplit("_", 1)
         if measure_mode not in scheduling_times_by_suffix:
             scheduling_times_by_suffix[measure_mode] = {}

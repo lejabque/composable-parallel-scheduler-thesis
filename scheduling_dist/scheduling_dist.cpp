@@ -17,19 +17,84 @@ struct ScheduledTask {
 };
 } // namespace
 
-static std::vector<ScheduledTask> RunOnce(size_t threadNum, size_t tasksNum) {
+static std::vector<ScheduledTask> RunWithBarrier(size_t threadNum) {
+  std::atomic<size_t> reported(0);
+  std::vector<ScheduledTask> results(threadNum);
+  auto start = Now();
+  ParallelFor(0, threadNum, [&](size_t i) {
+    results[i].Time = Now() - start;
+    results[i].Id = GetThreadIndex();
+    reported.fetch_add(1);
+    // it's ok to block here because we want
+    // to measure time of all threadNum threads
+    while (reported.load() != threadNum) {
+      // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      std::this_thread::yield();
+    }
+  });
+  return results;
+}
+
+static std::vector<ScheduledTask> RunWithSpin(size_t threadNum) {
+  std::vector<ScheduledTask> results(threadNum);
+  auto start = Now();
+  ParallelFor(0, threadNum, [&](size_t i) {
+    results[i].Time = Now() - start;
+    results[i].Id = GetThreadIndex();
+    // spin 1 seconds
+    auto spinStart = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - spinStart <
+           std::chrono::seconds(1)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      // std::this_thread::yield();
+    }
+    // TODO: kmp block time here? maybe spin 1 second without sleep?
+  });
+  return results;
+}
+
+static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
+  auto tasksNum = threadNum * 100;
+  auto totalBenchTime = std::chrono::duration<double>(1);
+  auto sleepFor = totalBenchTime * threadNum / tasksNum;
   std::vector<ScheduledTask> results(tasksNum);
   auto start = Now();
   ParallelFor(0, tasksNum, [&](size_t i) {
     results[i].Time = Now() - start;
     results[i].Id = GetThreadIndex();
-    // spin 10ms without sleep
+    // sleep for emulating work
+    // std::this_thread::sleep_for(sleepFor);
     auto spinStart = std::chrono::steady_clock::now();
-    while (std::chrono::steady_clock::now() - spinStart <
-           std::chrono::milliseconds(10)) {
+    while (std::chrono::steady_clock::now() - spinStart < sleepFor) {
+      // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      std::this_thread::yield();
     }
   });
   return results;
+}
+
+static std::vector<ScheduledTask> RunOnce(size_t threadNum) {
+#ifdef __x86_64__
+  asm volatile("mfence" ::: "memory");
+#endif
+#ifdef __aarch64__
+  asm volatile(
+      "DMB SY \n" /* Data Memory Barrier. Full runtime operation. */
+      "DSB SY \n" /* Data Synchronization Barrier. Full runtime operation. */
+      "ISB    \n" /* Instruction Synchronization Barrier. */
+      ::
+          : "memory");
+#endif
+
+#if SCHEDULING_MEASURE_MODE == BARRIER
+  return RunWithBarrier(threadNum);
+#endif
+#if SCHEDULING_MEASURE_MODE == SLEEP
+  return RunWithSpin(threadNum);
+#endif
+#if SCHEDULING_MEASURE_MODE == MULTITASK
+  return RunMultitask(threadNum);
+#endif
 }
 
 static void

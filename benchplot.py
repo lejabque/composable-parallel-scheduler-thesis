@@ -101,7 +101,7 @@ def plot_scheduling_dist(scheduling_dist):
         task_count = max(max(tasks) for tasks in scheduling_dist[i].values()) + 1
         data = np.ones((thread_count, task_count))
         total = 0
-        for _, tasks in scheduling_dist[i].items():
+        for _, tasks in sorted(scheduling_dist[i].items(), key=lambda x: x[0]):
             for task_idx in tasks:
                 data[total, task_idx] = 0
             total += 1

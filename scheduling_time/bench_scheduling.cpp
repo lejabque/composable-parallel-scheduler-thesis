@@ -16,10 +16,10 @@
 
 static thread_local TimeLogger timeLogger;
 
-static std::vector<uint64_t> RunWithBarrier(size_t threadNum) {
+static std::vector<Timestamp> RunWithBarrier(size_t threadNum) {
   auto start = Now();
   std::atomic<size_t> reported(0);
-  std::vector<uint64_t> times(threadNum);
+  std::vector<Timestamp> times(threadNum);
   times.reserve(threadNum);
   ParallelFor(0, threadNum, [&](size_t i) {
     times[i] = Now() - start;
@@ -34,9 +34,9 @@ static std::vector<uint64_t> RunWithBarrier(size_t threadNum) {
   return times;
 }
 
-static std::vector<uint64_t> RunWithSpin(size_t threadNum) {
+static std::vector<Timestamp> RunWithSpin(size_t threadNum) {
   auto start = Now();
-  std::vector<uint64_t> times(threadNum);
+  std::vector<Timestamp> times(threadNum);
   ParallelFor(0, threadNum, [&](size_t i) {
     times[i] = Now() - start;
     // spin 1 seconds
@@ -51,7 +51,7 @@ static std::vector<uint64_t> RunWithSpin(size_t threadNum) {
   return times;
 }
 
-static std::vector<uint64_t> RunMultitask(size_t threadNum) {
+static std::vector<Timestamp> RunMultitask(size_t threadNum) {
   auto start = Now();
   auto tasksNum = threadNum * 100;
   auto totalBenchTime = std::chrono::duration<double>(1);
@@ -69,7 +69,7 @@ static std::vector<uint64_t> RunMultitask(size_t threadNum) {
   return TimeLogger::EndEpoch();
 }
 
-static std::vector<uint64_t> RunOnce(size_t threadNum) {
+static std::vector<Timestamp> RunOnce(size_t threadNum) {
 #ifdef __x86_64__
   asm volatile("mfence" ::: "memory");
 #endif
@@ -94,7 +94,7 @@ static std::vector<uint64_t> RunOnce(size_t threadNum) {
 }
 
 static void printTimes(size_t threadNum,
-                       const std::vector<std::vector<uint64_t>> &result) {
+                       const std::vector<std::vector<Timestamp>> &result) {
   std::cout << "{";
   std::cout << "\"thread_num\": " << threadNum << ", ";
   std::cout << "\"results\": [";
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
   RunOnce(threadNum); // just for warmup
 
   size_t repeat = 5;
-  std::vector<std::vector<uint64_t>> results;
+  std::vector<std::vector<Timestamp>> results;
   for (size_t i = 0; i < repeat; i++) {
     auto times = RunOnce(threadNum);
     std::sort(times.begin(), times.end());

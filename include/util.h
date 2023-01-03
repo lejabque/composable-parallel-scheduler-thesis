@@ -45,3 +45,16 @@ inline int GetThreadIndex() {
   return omp_get_thread_num();
 #endif
 }
+
+using Timestamp = uint64_t;
+
+inline Timestamp Now() {
+#ifdef __x86_64__
+  return __rdtsc();
+#endif
+#ifdef __aarch64__
+  Timestamp val;
+  asm volatile("mrs %0, cntvct_el0" : "=r"(val));
+  return val;
+#endif
+}

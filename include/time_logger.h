@@ -1,26 +1,15 @@
 
 #pragma once
-
 #include "spin_lock.h"
+#include "util.h"
 #include <mutex>
 #include <vector>
-
-inline uint64_t Now() {
-#ifdef __x86_64__
-  return __rdtsc();
-#endif
-#ifdef __aarch64__
-  uint64_t val;
-  asm volatile("mrs %0, cntvct_el0" : "=r"(val));
-  return val;
-#endif
-}
 
 struct TimeLogger {
   // saves time of first report in current epoch
   // we need epochs to reset times in all threads after each benchmark
   // just incrementing epoch
-  void ReportTime(uint64_t result) {
+  void ReportTime(Timestamp result) {
     if (reportedEpoch < currentEpoch) {
       // lock is aquired only once per epoch
       // so it doesn't affect measurements
@@ -30,8 +19,8 @@ struct TimeLogger {
     }
   }
 
-  static std::vector<uint64_t> EndEpoch() {
-    std::vector<uint64_t> res;
+  static std::vector<Timestamp> EndEpoch() {
+    std::vector<Timestamp> res;
     std::lock_guard<SpinLock> guard(lock);
     res.swap(times);
     currentEpoch++;
@@ -43,6 +32,6 @@ private:
 
   // common for all threads
   static inline SpinLock lock;
-  static inline std::vector<uint64_t> times; // nanoseconds
+  static inline std::vector<Timestamp> times; // nanoseconds
   static inline std::atomic<size_t> currentEpoch = 1;
 };

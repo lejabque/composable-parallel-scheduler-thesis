@@ -77,33 +77,28 @@ def plot_scheduling_benchmarks(scheduling_times):
     return fig
 
 
-def format_axes(fig):
-    for i, ax in enumerate(fig.axes):
-        ax.text(0.5, 0.5, "ax%d" % (i+1), va="center", ha="center")
-        ax.tick_params(labelbottom=False, labelleft=False)
-
-
 def plot_scheduling_dist(scheduling_dist):
     # plot heatmap for map of thread_idx -> tasks list
     row_count = len(scheduling_dist)
     fig = plt.figure(figsize=(10, 15))
+    fig.suptitle("Scheduling distribution")
     fig.tight_layout()
     gs = GridSpec(row_count, 1, figure=fig)
-    # gs.update(wspace=1.5, hspace=1)
 
-    format_axes(fig)
-    # # axs.set_title("Scheduling distribution")
-    # # axs.set_ylabel("Index of thread")
-    # # axs.set_xlabel("Index of task")
-    for i in range(row_count):
-        ax = fig.add_subplot(gs[i, 0])
-        thread_count = len(scheduling_dist[i])
-        task_count = max(max(tasks) for tasks in scheduling_dist[i].values()) + 1
+
+    for iter in range(row_count):
+        ax = fig.add_subplot(gs[iter, 0])
+        ax.set_ylabel("Thread")
+        ax.set_xlabel("Task")
+        ax.get_figure().tight_layout()
+
+        thread_count = len(scheduling_dist[iter])
+        task_count = max(max(t["index"] for t in tasks) for tasks in scheduling_dist[iter].values()) + 1
         data = np.ones((thread_count, task_count))
         total = 0
-        for _, tasks in sorted(scheduling_dist[i].items(), key=lambda x: x[0]):
-            for task_idx in tasks:
-                data[total, task_idx] = 0
+        for _, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
+            for scheduled_task in tasks:
+                data[total, scheduled_task["index"]] = 0
             total += 1
         ax.imshow(data, cmap='gray', origin='lower')
     return fig

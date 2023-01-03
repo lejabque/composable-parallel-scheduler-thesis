@@ -1,67 +1,65 @@
 #include "../include/parallel_for.h"
-#include "../include/thread_logger.h"
 
 #include <chrono>
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 
 #define SLEEP 1
 #define BARRIER 2
 #define RUNNING 3
 
-static std::vector<ThreadLogger::ThreadId> RunOnce(size_t threadNum,
-                                                   size_t tasksNum) {
-  ThreadLogger logger(tasksNum);
+namespace {
+using ThreadId = int;
+struct ScheduledTask {
+  ThreadId Id;
+  Timestamp Time;
+};
+} // namespace
+
+static std::vector<ScheduledTask> RunOnce(size_t threadNum, size_t tasksNum) {
+  std::vector<ScheduledTask> results(tasksNum);
+  auto start = Now();
   ParallelFor(0, tasksNum, [&](size_t i) {
-    logger.Log(i);
+    results[i].Time = Now() - start;
+    results[i].Id = GetThreadIndex();
     // spin 10ms without sleep
     auto spinStart = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - spinStart <
            std::chrono::milliseconds(10)) {
     }
   });
-  return logger.GetIds();
+  return results;
 }
 
 static void
-PrintIds(size_t threadNum,
-         const std::vector<std::vector<ThreadLogger::ThreadId>> &results) {
-  std::vector<std::unordered_map<ThreadLogger::ThreadId, std::vector<size_t>>>
-      counters;
-  for (auto &&res : results) {
-    std::unordered_map<ThreadLogger::ThreadId, std::vector<size_t>> map;
-    for (size_t i = 0; i < res.size(); ++i) {
-      map[res[i]].push_back(i);
-    }
-    counters.push_back(std::move(map));
-  }
+PrintResults(size_t threadNum,
+             const std::vector<std::vector<ScheduledTask>> &results) {
   std::cout << "{" << std::endl;
   std::cout << "\"thread_num\": " << threadNum << "," << std::endl;
   std::cout << "\"tasks_num\": " << results[0].size() << "," << std::endl;
   std::cout << "\"results\": [" << std::endl;
-  for (size_t i = 0; i < counters.size(); ++i) {
+  for (size_t iter = 0; iter != results.size(); ++iter) {
+    auto &&res = results[iter];
+    std::unordered_map<ThreadId, std::vector<std::pair<size_t, Timestamp>>>
+        resultPerThread;
+    for (size_t i = 0; i < res.size(); ++i) {
+      auto &&task = res[i];
+      resultPerThread[task.Id].emplace_back(i, task.Time);
+    }
     std::cout << "  {" << std::endl;
-    auto &&counter = counters[i];
     size_t total = 0;
-    for (auto &&[threadid, tasks] : counter) {
-      std::cout << "  \"" << threadid << "\": [";
-      for (size_t i = 0; i < tasks.size(); ++i) {
-        std::cout << tasks[i];
-        if (i + 1 != tasks.size()) {
-          std::cout << ", ";
-        }
+    for (auto &&[id, tasks] : resultPerThread) {
+      std::cout << "    \"" << id << "\": [";
+      for (size_t i = 0; i != tasks.size(); ++i) {
+        auto &&[index, time] = tasks[i];
+        std::cout << "{\"index\": " << index << ", \"time\": " << time << "}"
+                  << (i == tasks.size() - 1 ? "" : ", ");
       }
-      std::cout << "]";
-      if (++total != counter.size()) {
-        std::cout << ",";
-      }
-      std::cout << std::endl;
+      std::cout << (++total == resultPerThread.size() ? " ]" : "],")
+                << std::endl;
     }
-    if (i + 1 != counters.size()) {
-      std::cout << "  }," << std::endl;
-    } else {
-      std::cout << "  }" << std::endl;
-    }
+    std::cout << (iter + 1 == results.size() ? "  }" : "  },") << std::endl;
   }
   std::cout << "]" << std::endl;
   std::cout << "}" << std::endl;
@@ -74,10 +72,10 @@ int main(int argc, char **argv) {
   }
   RunOnce(threadNum, threadNum); // just for warmup
 
-  std::vector<std::vector<ThreadLogger::ThreadId>> results;
+  std::vector<std::vector<ScheduledTask>> results;
   for (size_t i = 0; i < 10; ++i) {
     results.push_back(RunOnce(threadNum, 10 * threadNum));
   }
-  PrintIds(threadNum, results);
+  PrintResults(threadNum, results);
   return 0;
 }

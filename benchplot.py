@@ -105,7 +105,7 @@ def plot_scheduling_dist(scheduling_dist):
             for task_idx in tasks:
                 data[total, task_idx] = 0
             total += 1
-        ax.imshow(data, cmap='gray')
+        ax.imshow(data, cmap='gray', origin='lower')
     return fig
 
 

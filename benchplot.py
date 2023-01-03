@@ -3,6 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from matplotlib.gridspec import GridSpec
 
 
 def split_bench_name(s):
@@ -76,21 +77,35 @@ def plot_scheduling_benchmarks(scheduling_times):
     return fig
 
 
+def format_axes(fig):
+    for i, ax in enumerate(fig.axes):
+        ax.text(0.5, 0.5, "ax%d" % (i+1), va="center", ha="center")
+        ax.tick_params(labelbottom=False, labelleft=False)
+
+
 def plot_scheduling_dist(scheduling_dist):
     # plot heatmap for map of thread_idx -> tasks list
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    ax.set_title("Scheduling distribution")
-    ax.set_ylabel("Index of thread")
-    ax.set_xlabel("Index of task")
-    thread_count = len(scheduling_dist)
-    task_count = max(max(tasks) for tasks in scheduling_dist.values()) + 1
-    data = np.ones((thread_count, task_count))
-    total = 0
-    for _, tasks in scheduling_dist.items():
-        for task_idx in tasks:
-            data[total, task_idx] = 0
-        total += 1
-    ax.imshow(data, cmap='gray')
+    row_count = len(scheduling_dist)
+    fig = plt.figure(figsize=(10, 15))
+    fig.tight_layout()
+    gs = GridSpec(row_count, 1, figure=fig)
+    # gs.update(wspace=1.5, hspace=1)
+
+    format_axes(fig)
+    # # axs.set_title("Scheduling distribution")
+    # # axs.set_ylabel("Index of thread")
+    # # axs.set_xlabel("Index of task")
+    for i in range(row_count):
+        ax = fig.add_subplot(gs[i, 0])
+        thread_count = len(scheduling_dist[i])
+        task_count = max(max(tasks) for tasks in scheduling_dist[i].values()) + 1
+        data = np.ones((thread_count, task_count))
+        total = 0
+        for _, tasks in scheduling_dist[i].items():
+            for task_idx in tasks:
+                data[total, task_idx] = 0
+            total += 1
+        ax.imshow(data, cmap='gray')
     return fig
 
 
@@ -107,7 +122,7 @@ if __name__ == "__main__":
         if not bench_type.startswith("bench") or bench_type.startswith("bench_scheduling"):
             continue
         fig = plot_benchmark(bench, bench_type)
-        fig.savefig(os.path.join(res_path, bench_type + '.png'))
+        fig.savefig(os.path.join(res_path, bench_type + '.png'), bbox_inches='tight')
 
     # plot with and without barrier
     # group scheduling_times by suffix
@@ -120,7 +135,7 @@ if __name__ == "__main__":
 
     for measure_mode, times in scheduling_times_by_suffix.items():
         fig = plot_scheduling_benchmarks(times)
-        fig.savefig(os.path.join(res_path, "scheduling_time_" + measure_mode + '.png'))
+        fig.savefig(os.path.join(res_path, "scheduling_time_" + measure_mode + '.png'), bbox_inches='tight')
 
     # plot average scheduling time for all benchs
     # avg_times = {}
@@ -132,6 +147,5 @@ if __name__ == "__main__":
     # plot scheduling dist
     for bench_mode, res in benchmarks["scheduling_dist"].items():
         fig = plot_scheduling_dist(res["results"])
-        fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'))
-
+        fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'), bbox_inches='tight')
 

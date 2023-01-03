@@ -23,32 +23,47 @@ static std::vector<ThreadLogger::ThreadId> RunOnce(size_t threadNum,
   return logger.GetIds();
 }
 
-static void PrintIds(size_t threadNum,
-                     const std::vector<ThreadLogger::ThreadId> &ids) {
-  std::unordered_map<ThreadLogger::ThreadId, std::vector<size_t>> counter;
-  for (size_t i = 0; i < ids.size(); ++i) {
-    counter[ids[i]].push_back(i);
+static void
+PrintIds(size_t threadNum,
+         const std::vector<std::vector<ThreadLogger::ThreadId>> &results) {
+  std::vector<std::unordered_map<ThreadLogger::ThreadId, std::vector<size_t>>>
+      counters;
+  for (auto &&res : results) {
+    std::unordered_map<ThreadLogger::ThreadId, std::vector<size_t>> map;
+    for (size_t i = 0; i < res.size(); ++i) {
+      map[res[i]].push_back(i);
+    }
+    counters.push_back(std::move(map));
   }
   std::cout << "{" << std::endl;
   std::cout << "\"thread_num\": " << threadNum << "," << std::endl;
-  std::cout << "\"tasks_num\": " << ids.size() << "," << std::endl;
-  std::cout << "\"results\": {" << std::endl;
-  size_t total = 0;
-  for (auto &&[threadid, tasks] : counter) {
-    std::cout << "  \"" << threadid << "\": [";
-    for (size_t i = 0; i < tasks.size(); ++i) {
-      std::cout << tasks[i];
-      if (i + 1 != tasks.size()) {
-        std::cout << ", ";
+  std::cout << "\"tasks_num\": " << results[0].size() << "," << std::endl;
+  std::cout << "\"results\": [" << std::endl;
+  for (size_t i = 0; i < counters.size(); ++i) {
+    std::cout << "  {" << std::endl;
+    auto &&counter = counters[i];
+    size_t total = 0;
+    for (auto &&[threadid, tasks] : counter) {
+      std::cout << "  \"" << threadid << "\": [";
+      for (size_t i = 0; i < tasks.size(); ++i) {
+        std::cout << tasks[i];
+        if (i + 1 != tasks.size()) {
+          std::cout << ", ";
+        }
       }
+      std::cout << "]";
+      if (++total != counter.size()) {
+        std::cout << ",";
+      }
+      std::cout << std::endl;
     }
-    std::cout << "]";
-    if (++total != counter.size()) {
-      std::cout << ",";
+    if (i + 1 != counters.size()) {
+      std::cout << "  }," << std::endl;
+    } else {
+      std::cout << "  }" << std::endl;
     }
-    std::cout << std::endl;
   }
-  std::cout << "  }" << std::endl;
+  std::cout << "]" << std::endl;
   std::cout << "}" << std::endl;
 }
 
@@ -59,7 +74,10 @@ int main(int argc, char **argv) {
   }
   RunOnce(threadNum, threadNum); // just for warmup
 
-  auto results = RunOnce(threadNum, 10 * threadNum);
+  std::vector<std::vector<ThreadLogger::ThreadId>> results;
+  for (size_t i = 0; i < 10; ++i) {
+    results.push_back(RunOnce(threadNum, 10 * threadNum));
+  }
   PrintIds(threadNum, results);
   return 0;
 }

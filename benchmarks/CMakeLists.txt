@@ -67,7 +67,7 @@ if(NOT TBB_FOUND)
 endif()
 
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
+# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
 
 
 # build options

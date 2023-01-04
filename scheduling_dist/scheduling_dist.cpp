@@ -75,26 +75,27 @@ static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
 }
 
 static std::vector<ScheduledTask> RunOnce(size_t threadNum) {
-#ifdef __x86_64__
+#if defined(__x86_64__)
   asm volatile("mfence" ::: "memory");
-#endif
-#ifdef __aarch64__
+#elif defined(__aarch64__)
   asm volatile(
       "DMB SY \n" /* Data Memory Barrier. Full runtime operation. */
       "DSB SY \n" /* Data Synchronization Barrier. Full runtime operation. */
       "ISB    \n" /* Instruction Synchronization Barrier. */
       ::
           : "memory");
+#else
+  static_assert(false, "Unsupported architecture");
 #endif
 
 #if SCHEDULING_MEASURE_MODE == BARRIER
   return RunWithBarrier(threadNum);
-#endif
-#if SCHEDULING_MEASURE_MODE == SLEEP
+#elif SCHEDULING_MEASURE_MODE == SLEEP
   return RunWithSpin(threadNum);
-#endif
-#if SCHEDULING_MEASURE_MODE == MULTITASK
+#elif SCHEDULING_MEASURE_MODE == MULTITASK
   return RunMultitask(threadNum);
+#else
+  static_assert(false, "Unsupported mode");
 #endif
 }
 

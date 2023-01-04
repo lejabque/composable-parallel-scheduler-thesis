@@ -18,13 +18,11 @@
 // TODO: move out some initializations from body to avoid init overhead?
 
 template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
-#ifdef SERIAL
+#if defined(SERIAL)
   for (size_t i = from; i < to; ++i) {
     func(i);
   }
-#endif
-
-#ifdef TBB_MODE
+#elif defined(TBB_MODE)
   static tbb::task_group_context context(
       tbb::task_group_context::bound,
       tbb::task_group_context::default_traits |
@@ -41,7 +39,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #elif TBB_MODE == TBB_CONST_AFFINITY
   tbb::affinity_partitioner part;
 #else
-#error Wrong PARALLEL mode
+  static_assert(false, "Wrong TBB_MODE mode");
 #endif
   // TODO: grain size?
   tbb::parallel_for(
@@ -52,9 +50,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
         }
       },
       part, context);
-#endif
-
-#ifdef OMP_MODE
+#elif defined(OMP_MODE)
 #pragma omp parallel
 #if OMP_MODE == OMP_STATIC
 #pragma omp for nowait schedule(static)
@@ -72,7 +68,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #elif OMP_MODE == OMP_RUNTIME_NONMONOTONIC
 #pragma omp for nowait schedule(nonmonotonic : runtime)
 #else
-#error Wrong OMP_MODE mode
+  static_assert(false, "Wrong OMP_MODE mode");
 #endif
   for (size_t i = from; i < to; ++i) {
     func(i);

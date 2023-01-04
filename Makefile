@@ -44,10 +44,10 @@ bench_scan:
 	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_scan_* | xargs -n 1 basename | sort ) ; do numactl -N 0 benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=bench_results/$$x.json; done
 
 bench_scheduling:
-	@for x in $(shell ls -1 scheduling_time/cmake-build-release/bench_scheduling_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; OMP_WAIT_POLICY=active scheduling_time/cmake-build-release/$$x > bench_results/$$x.json; done
+	@for x in $(shell ls -1 scheduling_time/cmake-build-release/bench_scheduling_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; OMP_WAIT_POLICY=active KMP_BLOCKTIME=infinite scheduling_time/cmake-build-release/$$x > bench_results/$$x.json; done
 
 run_scheduling_dist:
-	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; scheduling_dist/cmake-build-release/$$x > bench_results/$$x.json; done
+	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; OMP_WAIT_POLICY=active KMP_BLOCKTIME=infinite scheduling_dist/cmake-build-release/$$x > bench_results/$$x.json; done
 
 bench: clean_bench bench_dir release_benchmarks release_scheduling bench_spmv bench_reduce bench_scan bench_scheduling run_scheduling_dist
 

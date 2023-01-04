@@ -103,7 +103,7 @@ def plot_scheduling_dist(scheduling_dist):
         for _, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
             max_time = max(t["time"] for t in tasks)
             for t in tasks:
-                data[total, t["index"]] = 1 - t["time"] / max_time
+                data[total, t["index"]] = t["time"] / max_time * 0.7
             total += 1
         ax.imshow(data, cmap='gray', origin='lower')
 
@@ -149,4 +149,3 @@ if __name__ == "__main__":
     for bench_mode, res in benchmarks["scheduling_dist"].items():
         fig = plot_scheduling_dist(res["results"])
         fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'), bbox_inches='tight')
-

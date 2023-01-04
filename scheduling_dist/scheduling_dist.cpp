@@ -1,5 +1,6 @@
 #include "../include/parallel_for.h"
 
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <unordered_map>
@@ -54,7 +55,7 @@ static std::vector<ScheduledTask> RunWithSpin(size_t threadNum) {
 }
 
 static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
-  auto tasksNum = threadNum * 100;
+  auto tasksNum = threadNum * 10;
   auto totalBenchTime = std::chrono::duration<double>(1);
   auto sleepFor = totalBenchTime * threadNum / tasksNum;
   std::vector<ScheduledTask> results(tasksNum);
@@ -135,11 +136,11 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     threadNum = std::stoi(argv[1]);
   }
-  RunOnce(threadNum, threadNum); // just for warmup
+  RunOnce(threadNum); // just for warmup
 
   std::vector<std::vector<ScheduledTask>> results;
   for (size_t i = 0; i < 10; ++i) {
-    results.push_back(RunOnce(threadNum, 10 * threadNum));
+    results.push_back(RunOnce(threadNum));
   }
   PrintResults(threadNum, results);
   return 0;

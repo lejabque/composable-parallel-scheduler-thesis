@@ -4,9 +4,16 @@ option(ENABLE_TESTS "Enable test" OFF)
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
 
-# use libstdc++ instead of libc++ for compatibility with google benchmark which is compiled with libstdc++
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++")
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # use libstdc++ instead of libc++ for compatibility with google benchmark which is compiled with libstdc++
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++")
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aligned-allocation")
+endif()
+
 
 project(composable-parallel-scheduler)
 

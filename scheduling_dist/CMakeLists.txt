@@ -7,7 +7,11 @@ project(composable-parallel-scheduler)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fopenmp -fopenmp-version=50")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fopenmp -fopenmp-version=50")
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aligned-allocation")
+endif()
 
 
 message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")

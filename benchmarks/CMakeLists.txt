@@ -4,6 +4,14 @@ option(ENABLE_TESTS "Enable test" OFF)
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
 
+project(composable-parallel-scheduler)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
+
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # use libstdc++ instead of libc++ for compatibility with google benchmark which is compiled with libstdc++
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
@@ -13,15 +21,6 @@ endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-aligned-allocation")
 endif()
-
-
-project(composable-parallel-scheduler)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-set(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-
 
 message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")

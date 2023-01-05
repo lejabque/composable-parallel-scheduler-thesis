@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eigen_pool.h"
 #include "util.h"
 
 #define OMP_STATIC 1
@@ -73,5 +74,17 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
   for (size_t i = from; i < to; ++i) {
     func(i);
   }
+#elif defined(EIGEN_MODE)
+  Eigen::Barrier barrier(to - from);
+  for (size_t i = from; i < to; ++i) {
+    EigenPool.Schedule([func, i, &barrier]() {
+      func(i);
+      barrier.Notify();
+    });
+  }
+  barrier.Wait();
+  // TODO: use main thread
+#else
+  static_assert(false, "Wrong mode");
 #endif
 }

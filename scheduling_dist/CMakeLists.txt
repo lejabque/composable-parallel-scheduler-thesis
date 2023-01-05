@@ -64,4 +64,8 @@ foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
       target_compile_definitions(scheduling_dist_${mode}_${scheduling_measure_mode} PRIVATE TBB_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
       target_link_libraries(scheduling_dist_${mode}_${scheduling_measure_mode} TBB::tbb)
   endforeach()
+  # eigen
+  add_executable(scheduling_dist_EIGEN_${scheduling_measure_mode} scheduling_dist.cpp)
+  target_compile_definitions(scheduling_dist_EIGEN_${scheduling_measure_mode} PRIVATE EIGEN_MODE=1 SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
+  target_link_libraries(scheduling_dist_EIGEN_${scheduling_measure_mode} OpenMP::OpenMP_CXX)
 endforeach()

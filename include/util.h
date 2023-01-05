@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eigen_pool.h"
 #include <string>
 
 #define STR_(x) #x
@@ -12,6 +13,8 @@ inline std::string GetParallelMode() {
   return STR(TBB_MODE);
 #elif defined(OMP_MODE)
   return STR(OMP_MODE);
+#elif defined(EIGEN_MODE)
+  return "EIGEN_MODE";
 #else
   static_assert(false, "Unsupported mode");
 #endif
@@ -37,6 +40,8 @@ inline int GetNumThreads() {
   return omp_get_max_threads();
 #elif defined(SERIAL)
   return 1;
+#elif defined(EIGEN_MODE)
+  return EigenPool.NumThreads();
 #else
   static_assert(false, "Unsupported mode");
 #endif
@@ -49,6 +54,8 @@ inline int GetThreadIndex() {
   return omp_get_thread_num();
 #elif defined(SERIAL)
   return 0;
+#elif defined(EIGEN_MODE)
+  return EigenPool.CurrentThreadId();
 #else
   static_assert(false, "Unsupported mode");
 #endif

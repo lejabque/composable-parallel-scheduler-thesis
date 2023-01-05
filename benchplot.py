@@ -68,7 +68,7 @@ def plot_scheduling_benchmarks(scheduling_times):
                                  key=lambda x: np.max(np.mean(np.asarray(x[1]), axis=0)))):
         # mean time per thread for each idx in range of thread count
         times = np.asarray(times)
-        means = np.mean(times, axis=0)
+        means = np.min(times, axis=0)
         # sort means array
         means = np.sort(means, axis=0)
         stds = np.std(times, axis=0)
@@ -106,6 +106,17 @@ def plot_scheduling_dist(scheduling_dist):
                 data[total, t["index"]] = t["time"] / max_time * 0.7
             total += 1
         ax.imshow(data, cmap='gray', origin='lower')
+
+    for iter in range(row_count):
+        ax = fig.add_subplot(gs[iter, 1])
+        ax.set_ylabel("Clock ticks")
+        ax.set_xlabel("Thread")
+        ax.get_figure().tight_layout()
+
+        thread_count = len(scheduling_dist[iter])
+        times = [min(task["time"] for task in tasks) for tasks in scheduling_dist[iter].values()]
+        times = np.sort(np.asarray(times))
+        ax.plot(range(len(times)), times)
 
     return fig
 

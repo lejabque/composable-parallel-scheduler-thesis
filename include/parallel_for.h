@@ -15,9 +15,19 @@
 #define TBB_AUTO 2
 #define TBB_AFFINITY 3
 #define TBB_CONST_AFFINITY 4
+#define TBB_RAPID 5
+
+#if TBB_MODE == TBB_RAPID
+#include "rapid_start.h"
+inline Harness::RapidStart g_rs;
+#endif
+inline void InitParallel(size_t threadsNum) {
+#if TBB_MODE == TBB_RAPID
+  g_rs.init(threadsNum);
+#endif
+}
 
 // TODO: move out some initializations from body to avoid init overhead?
-
 template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
 #if defined(SERIAL)
   for (size_t i = from; i < to; ++i) {
@@ -39,10 +49,19 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
   static tbb::affinity_partitioner part;
 #elif TBB_MODE == TBB_CONST_AFFINITY
   tbb::affinity_partitioner part;
+#elif TBB_MODE == TBB_RAPID
+  // no partitioner
 #else
   static_assert(false, "Wrong TBB_MODE mode");
 #endif
   // TODO: grain size?
+#if TBB_MODE == TBB_RAPID
+  g_rs.parallel_ranges(from, to, [&](auto from, auto to, auto part) {
+    for (size_t i = from; i != to; ++i) {
+      func(i);
+    }
+  });
+#else
   tbb::parallel_for(
       tbb::blocked_range(from, to),
       [&](const tbb::blocked_range<size_t> &range) {
@@ -51,6 +70,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
         }
       },
       part, context);
+#endif
 #elif defined(OMP_MODE)
 #pragma omp parallel
 #if OMP_MODE == OMP_STATIC

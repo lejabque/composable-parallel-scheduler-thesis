@@ -1,6 +1,7 @@
 #pragma once
 
 #include "eigen_pool.h"
+#include <iostream>
 #include <string>
 
 #define STR_(x) #x

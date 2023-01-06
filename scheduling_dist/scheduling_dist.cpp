@@ -137,6 +137,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     threadNum = std::stoi(argv[1]);
   }
+  InitParallel(threadNum);
   RunOnce(threadNum); // just for warmup
 
   std::vector<std::vector<ScheduledTask>> results;

@@ -1,9 +1,9 @@
 #pragma once
 #ifdef EIGEN_MODE
 #define EIGEN_USE_THREADS
-#include "../eigen/unsupported/Eigen/CXX11/Tensor"
-#include "../eigen/unsupported/Eigen/CXX11/TensorSymmetry"
-#include "../eigen/unsupported/Eigen/CXX11/ThreadPool"
+#include "../contrib/eigen/unsupported/Eigen/CXX11/Tensor"
+#include "../contrib/eigen/unsupported/Eigen/CXX11/TensorSymmetry"
+#include "../contrib/eigen/unsupported/Eigen/CXX11/ThreadPool"
 
 #include <omp.h>
 

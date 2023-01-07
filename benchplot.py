@@ -2,6 +2,7 @@ import json
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 import os
 from matplotlib.gridspec import GridSpec
 
@@ -19,7 +20,7 @@ def split_bench_name(s):
 
 # return new plot
 def plot_benchmark(benchmarks, title):
-    benchmarks = sorted(benchmarks.items(), key=lambda x: x[0])
+    benchmarks = sorted(benchmarks.items(), key=lambda x: x[1])
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 12))
     min_time = sorted(benchmarks, key=lambda x: x[1])[0][1]
     ax1.set_xlabel("Normalized perfomance of " + title)
@@ -64,9 +65,11 @@ def plot_scheduling_benchmarks(scheduling_times):
     min_times = [(bench_type, [[min([t["time"] for t in times]) for times in iter.values()] for iter in results]) for bench_type, results in scheduling_times.items()]
     # print(list(scheduling_times.items())[0][1][0])
     # items = [(bench_type, [[t["time"] for t in iter.values()] for iter in tasks]) for bench_type, tasks in scheduling_times.items()]
+    lines = ["-", "--", "-.", ":"]
     for bench_type, times in reversed(sorted(min_times,
                                  key=lambda x: np.max(np.mean(np.asarray(x[1]), axis=0)))):
-        # mean time per thread for each idx in range of thread count
+        # todo: better way to visualize?
+        # min time per thread for each idx in range of thread count
         times = np.asarray(times)
         means = np.min(times, axis=0)
         # sort means array
@@ -74,7 +77,7 @@ def plot_scheduling_benchmarks(scheduling_times):
         stds = np.std(times, axis=0)
         print(bench_type, means, stds)
         # TODO: plot stds
-        ax.plot(range(len(means)), means, label=bench_type)
+        ax.plot(range(len(means)), means, label=bench_type, linestyle=random.choice(lines))
     ax.set_title("Scheduling time")
     ax.set_xlabel("Index of thread")
     ax.set_ylabel("Clock ticks")

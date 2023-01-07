@@ -95,15 +95,34 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
     func(i);
   }
 #elif defined(EIGEN_MODE)
-  Eigen::Barrier barrier(to - from);
+  // auto blocks = GetNumThreads();
+  // auto size = to - from;
+  // auto blockSize = (size + blocks - 1) / blocks;
+  // Eigen::Barrier barrier(blocks - 1);
+  // auto executeRange = [&func, blockSize, from, to](size_t idx) {
+  //   auto start = from + idx * blockSize;
+  //   auto end = std::min(start + blockSize, to);
+  //   for (size_t i = start; i < end; ++i) {
+  //     func(i);
+  //   }
+  // };
+  // for (size_t i = 0; i < blocks - 1; ++i) {
+  //   EigenPool.Schedule([i, executeRange, &barrier]() {
+  //     executeRange(i);
+  //     barrier.Notify();
+  //   });
+  // }
+  // executeRange(blocks - 1);
+
+  Eigen::Barrier barrier(from - to);
   for (size_t i = from; i < to; ++i) {
     EigenPool.Schedule([func, i, &barrier]() {
       func(i);
       barrier.Notify();
     });
   }
+  // todo: main thread?
   barrier.Wait();
-  // TODO: use main thread
 #else
   static_assert(false, "Wrong mode");
 #endif

@@ -42,7 +42,7 @@ inline int GetNumThreads() {
 #elif defined(SERIAL)
   return 1;
 #elif defined(EIGEN_MODE)
-  return GetEigenThreadNum();
+  return std::thread::hardware_concurrency();
 #else
   static_assert(false, "Unsupported mode");
 #endif

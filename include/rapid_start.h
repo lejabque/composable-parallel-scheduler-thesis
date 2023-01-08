@@ -101,6 +101,7 @@ struct __attribute__((aligned(64))) RapidStart : tbb::detail::padded<mask1>,
         global.start_mask.fetch_add(bit);
         uintptr_t e = global.epoch.load(std::memory_order_relaxed);
         mask_t r = global.run_mask.load(std::memory_order_acquire);
+        // printf("Running thread %d on cpu %d\n", slot, sched_getcpu());
         do {
           if (r & bit) {
             // printf("#%d trapped r=%lu mode=%d e=%lu\n", slot, r, global.mode,

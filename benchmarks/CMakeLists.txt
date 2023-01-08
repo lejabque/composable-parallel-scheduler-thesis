@@ -104,7 +104,7 @@ foreach(bench IN LISTS BENCHMARKS)
     foreach(mode IN LISTS EIGEN_MODES)
       add_executable(${bench}_${mode} ${bench}.cpp)
       target_compile_definitions(${bench}_${mode} PRIVATE EIGEN_MODE=${mode})
-      target_link_libraries(${bench}_${mode} benchmark::benchmark OpenMP::OpenMP_CXX TBB::tbb)
+      target_link_libraries(${bench}_${mode} benchmark::benchmark TBB::tbb)
     endforeach()
 endforeach()
 

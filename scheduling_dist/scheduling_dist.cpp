@@ -46,8 +46,8 @@ static std::vector<ScheduledTask> RunWithSpin(size_t threadNum) {
     auto spinStart = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - spinStart <
            std::chrono::seconds(1)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      // std::this_thread::yield();
+      // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      //  std::this_thread::yield();
     }
     // TODO: kmp block time here? maybe spin 1 second without sleep?
   });

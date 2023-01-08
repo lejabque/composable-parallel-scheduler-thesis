@@ -1,21 +1,19 @@
 #pragma once
+#include "modes.h"
+
 #ifdef EIGEN_MODE
+
 #define EIGEN_USE_THREADS
 #include "../contrib/eigen/unsupported/Eigen/CXX11/Tensor"
 #include "../contrib/eigen/unsupported/Eigen/CXX11/TensorSymmetry"
 #include "../contrib/eigen/unsupported/Eigen/CXX11/ThreadPool"
 
-inline size_t GetEigenPoolThreadNum() {
-#if EIGEN_MODE == EIGEN_SIMPLE
+inline size_t GetEigenThreadsNum() {
   return std::thread::hardware_concurrency();
-#elif EIGEN_MODE == EIGEN_RAPID
-  return std::thread::hardware_concurrency() - 1; // 1 for main
-#else
-  static_assert(false, "Wrong EIGEN_MODE mode");
-#endif
 }
 
-inline auto EigenPool = Eigen::ThreadPool(GetEigenPoolThreadNum());
+inline auto EigenPool =
+    Eigen::ThreadPool(GetEigenThreadsNum() - 1); // 1 for main thread
 
 class EigenPoolWrapper {
 public:
@@ -27,4 +25,5 @@ public:
     // TODO: implement
   }
 };
+
 #endif

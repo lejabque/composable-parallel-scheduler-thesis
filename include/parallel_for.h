@@ -1,24 +1,8 @@
 #pragma once
 
 #include "eigen_pool.h"
+#include "modes.h"
 #include "util.h"
-
-#define OMP_STATIC 1
-#define OMP_DYNAMIC_MONOTONIC 2
-#define OMP_DYNAMIC_NONMONOTONIC 3
-#define OMP_GUIDED_MONOTONIC 4
-#define OMP_GUIDED_NONMONOTONIC 5
-#define OMP_RUNTIME_MONOTONIC 6
-#define OMP_RUNTIME_NONMONOTONIC 7
-
-#define TBB_SIMPLE 1
-#define TBB_AUTO 2
-#define TBB_AFFINITY 3
-#define TBB_CONST_AFFINITY 4
-#define TBB_RAPID 5
-
-#define EIGEN_SIMPLE 1
-#define EIGEN_RAPID 2
 
 #if TBB_MODE == TBB_RAPID
 #include "rapid_start.h"
@@ -35,6 +19,43 @@ inline void InitParallel(size_t threadsNum) {
   RapidGroup.init(threadsNum);
 #endif
 }
+
+#ifdef EIGEN_MODE
+// TODO: move to eigen header
+template <typename F>
+inline void EigenParallelFor(size_t from, size_t to, F &&func) {
+#if EIGEN_MODE == EIGEN_SIMPLE
+  size_t blocks = GetEigenThreadsNum();
+  size_t blockSize = (to - from + blocks - 1) / blocks;
+  Eigen::Barrier barrier(blocks - 1);
+  for (size_t i = 0; i < blocks - 1; ++i) {
+    size_t start = from + i * blockSize;
+    size_t end = std::min(start + blockSize, to);
+    EigenPool.ScheduleWithHint(
+        [func, start, end, &barrier]() {
+          for (size_t i = start; i < end; ++i) {
+            func(i);
+          }
+          barrier.Notify();
+        },
+        i, i + 1);
+  }
+  // main thread
+  for (size_t i = from + (blocks - 1) * blockSize; i < to; ++i) {
+    func(i);
+  }
+  barrier.Wait();
+#elif EIGEN_MODE == EIGEN_RAPID
+  RapidGroup.parallel_ranges(from, to, [&func](auto from, auto to, auto part) {
+    for (size_t i = from; i != to; ++i) {
+      func(i);
+    }
+  });
+#else
+  static_assert(false, "Wrong EIGEN_MODE mode");
+#endif
+}
+#endif
 
 // TODO: move out some initializations from body to avoid init overhead?
 template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
@@ -104,29 +125,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
     func(i);
   }
 #elif defined(EIGEN_MODE)
-#if EIGEN_MODE == EIGEN_SIMPLE
-  Eigen::Barrier barrier(to - from);
-  auto threads = GetNumThreads();
-  for (size_t i = from; i < to; ++i) {
-    size_t hint = (i - from) % threads;
-    EigenPool.ScheduleWithHint(
-        [func, i, &barrier]() {
-          func(i);
-          barrier.Notify();
-        },
-        hint, hint + 1);
-  }
-  // todo: use main thread?
-  barrier.Wait();
-#elif EIGEN_MODE == EIGEN_RAPID
-  RapidGroup.parallel_ranges(from, to, [&](auto from, auto to, auto part) {
-    for (size_t i = from; i != to; ++i) {
-      func(i);
-    }
-  });
-#else
-  static_assert(false, "Wrong EIGEN_MODE mode");
-#endif
+  EigenParallelFor(from, to, func);
 #else
   static_assert(false, "Wrong mode");
 #endif

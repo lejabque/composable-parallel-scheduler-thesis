@@ -1,25 +1,9 @@
 #pragma once
 
 #include "eigen_pool.h"
+#include "modes.h"
 #include <iostream>
 #include <string>
-
-#define STR_(x) #x
-#define STR(x) STR_(x)
-
-inline std::string GetParallelMode() {
-#if defined(SERIAL)
-  return "SERIAL";
-#elif defined(TBB_MODE)
-  return STR(TBB_MODE);
-#elif defined(OMP_MODE)
-  return STR(OMP_MODE);
-#elif defined(EIGEN_MODE)
-  return "EIGEN_MODE";
-#else
-  static_assert(false, "Unsupported mode");
-#endif
-}
 
 #ifdef TBB_MODE
 #include <tbb/blocked_range.h>
@@ -42,7 +26,7 @@ inline int GetNumThreads() {
 #elif defined(SERIAL)
   return 1;
 #elif defined(EIGEN_MODE)
-  return std::thread::hardware_concurrency();
+  return GetEigenThreadsNum();
 #else
   static_assert(false, "Unsupported mode");
 #endif

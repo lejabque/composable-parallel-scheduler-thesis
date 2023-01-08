@@ -24,7 +24,7 @@ def plot_benchmark(benchmarks, title):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 12))
     min_time = sorted(benchmarks, key=lambda x: x[1])[0][1]
     ax1.set_xlabel("Normalized perfomance of " + title)
-    print([(name, min_time / time) for name, time in benchmarks])
+    # print([(name, min_time / time) for name, time in benchmarks])
     ax1 = ax1.barh(*zip(*[(name, min_time / time) for name, time in benchmarks]))
 
     ax2.set_xlabel("Time of " + title + ", us")
@@ -38,7 +38,7 @@ def parse_benchmarks(folder_name):
         if not bench_file.endswith('.json'):
             continue
         with open(os.path.join(folder_name, bench_file)) as f:
-            print(bench_file)
+            # print(bench_file)
             bench = json.load(f)
             name = bench_file.split(".")[0]
             bench_type, bench_mode = split_bench_name(name)
@@ -75,7 +75,7 @@ def plot_scheduling_benchmarks(scheduling_times):
         # sort means array
         means = np.sort(means, axis=0)
         stds = np.std(times, axis=0)
-        print(bench_type, means, stds)
+        # print(bench_type, means, stds)
         # TODO: plot stds
         ax.plot(range(len(means)), means, label=bench_type, linestyle=random.choice(lines))
     ax.set_title("Scheduling time")
@@ -88,10 +88,10 @@ def plot_scheduling_benchmarks(scheduling_times):
 def plot_scheduling_dist(scheduling_dist):
     # plot heatmap for map of thread_idx -> tasks list
     row_count = len(scheduling_dist)
-    fig = plt.figure(figsize=(10, 15))
+    fig = plt.figure(figsize=(12, 18))
     fig.suptitle("Scheduling distribution")
     fig.tight_layout()
-    gs = GridSpec(row_count, 2, figure=fig)
+    gs = GridSpec(row_count, 3, figure=fig)
 
     for iter in range(row_count):
         ax = fig.add_subplot(gs[iter, 0])
@@ -107,11 +107,27 @@ def plot_scheduling_dist(scheduling_dist):
             max_time = max(t["time"] for t in tasks)
             for t in tasks:
                 data[total, t["index"]] = t["time"] / max_time * 0.7
-            total += 1
+            total += 1  # todo: order?
+        ax.imshow(data, cmap='gray', origin='lower')
+
+    # plot heatmap thread id, cpu id
+    for iter in range(row_count):
+        ax = fig.add_subplot(gs[iter, 1])
+        ax.set_ylabel("Thread")
+        ax.set_xlabel("Cpu")
+        ax.get_figure().tight_layout()
+
+        thread_count = len(scheduling_dist[iter])
+        cpu_count = max(max(t["cpu"] for t in tasks) for tasks in scheduling_dist[iter].values()) + 1
+        data = np.ones((thread_count, cpu_count))
+        for thread_id, tasks in scheduling_dist[iter].items():
+            for t in tasks:
+                idx = cpu_count - 1 if thread_id == "-1" else int(thread_id)
+                data[idx, t["cpu"]] = 0
         ax.imshow(data, cmap='gray', origin='lower')
 
     for iter in range(row_count):
-        ax = fig.add_subplot(gs[iter, 1])
+        ax = fig.add_subplot(gs[iter, 2])
         ax.set_ylabel("Clock ticks")
         ax.set_xlabel("Thread")
         ax.get_figure().tight_layout()
@@ -162,4 +178,9 @@ if __name__ == "__main__":
     # plot scheduling dist
     for bench_mode, res in benchmarks["scheduling_dist"].items():
         fig = plot_scheduling_dist(res["results"])
+        for iter in res["results"]:
+            for thread_id, tasks in iter.items():
+                unique_cpus = set(t["cpu"] for t in tasks)
+                if len(unique_cpus) > 1:
+                    print(f"{bench_mode}: {thread_id} has tasks on different cpus: {unique_cpus}")
         fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'), bbox_inches='tight')

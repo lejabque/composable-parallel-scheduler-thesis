@@ -13,8 +13,19 @@
 namespace {
 using ThreadId = int;
 struct ScheduledTask {
+  size_t TaskIdx;
   ThreadId Id;
+  int SchedCpu;
   Timestamp Time;
+
+  ScheduledTask() = default;
+
+  ScheduledTask(size_t taskIdx, Timestamp start) {
+    Time = Now() - start; // do it first to avoid overhead of other fields
+    TaskIdx = taskIdx;
+    Id = GetThreadIndex();
+    SchedCpu = sched_getcpu();
+  }
 };
 } // namespace
 
@@ -23,14 +34,15 @@ static std::vector<ScheduledTask> RunWithBarrier(size_t threadNum) {
   std::vector<ScheduledTask> results(threadNum);
   auto start = Now();
   ParallelFor(0, threadNum, [&](size_t i) {
-    results[i].Time = Now() - start;
-    results[i].Id = GetThreadIndex();
+    results[i] = ScheduledTask(i, start);
     reported.fetch_add(1);
     // it's ok to block here because we want
     // to measure time of all threadNum threads
     while (reported.load() != threadNum) {
       // std::this_thread::sleep_for(std::chrono::milliseconds(1));
       // std::this_thread::yield();
+
+      // we don't sleep or yield here because we want to use cpu
     }
   });
   return results;
@@ -40,16 +52,16 @@ static std::vector<ScheduledTask> RunWithSpin(size_t threadNum) {
   std::vector<ScheduledTask> results(threadNum);
   auto start = Now();
   ParallelFor(0, threadNum, [&](size_t i) {
-    results[i].Time = Now() - start;
-    results[i].Id = GetThreadIndex();
+    results[i] = ScheduledTask(i, start);
     // spin 1 seconds
     auto spinStart = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - spinStart <
            std::chrono::seconds(1)) {
       // std::this_thread::sleep_for(std::chrono::milliseconds(1));
       //  std::this_thread::yield();
+
+      // we don't sleep or yield here because we want to use cpu
     }
-    // TODO: kmp block time here? maybe spin 1 second without sleep?
   });
   return results;
 }
@@ -61,14 +73,14 @@ static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
   std::vector<ScheduledTask> results(tasksNum);
   auto start = Now();
   ParallelFor(0, tasksNum, [&](size_t i) {
-    results[i].Time = Now() - start;
-    results[i].Id = GetThreadIndex();
-    // sleep for emulating work
-    // std::this_thread::sleep_for(sleepFor);
+    results[i] = ScheduledTask(i, start);
+    // spin for emulating work
     auto spinStart = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - spinStart < sleepFor) {
       // std::this_thread::sleep_for(std::chrono::milliseconds(1));
       // std::this_thread::yield();
+
+      // we don't sleep or yield here because we want to use cpu
     }
   });
   return results;
@@ -108,19 +120,20 @@ PrintResults(size_t threadNum,
   std::cout << "\"results\": [" << std::endl;
   for (size_t iter = 0; iter != results.size(); ++iter) {
     auto &&res = results[iter];
-    std::unordered_map<ThreadId, std::vector<std::pair<size_t, Timestamp>>>
-        resultPerThread;
+    std::unordered_map<ThreadId, std::vector<ScheduledTask>> resultPerThread;
     for (size_t i = 0; i < res.size(); ++i) {
-      auto &&task = res[i];
-      resultPerThread[task.Id].emplace_back(i, task.Time);
+      auto task = res[i];
+      resultPerThread[task.Id].emplace_back(task);
     }
     std::cout << "  {" << std::endl;
     size_t total = 0;
     for (auto &&[id, tasks] : resultPerThread) {
       std::cout << "    \"" << id << "\": [";
       for (size_t i = 0; i != tasks.size(); ++i) {
-        auto &&[index, time] = tasks[i];
-        std::cout << "{\"index\": " << index << ", \"time\": " << time << "}"
+        auto task = tasks[i];
+        std::cout << "{\"index\": " << task.TaskIdx
+                  << ", \"time\": " << task.Time
+                  << ", \"cpu\": " << task.SchedCpu << "}"
                   << (i == tasks.size() - 1 ? "" : ", ");
       }
       std::cout << (++total == resultPerThread.size() ? " ]" : "],")

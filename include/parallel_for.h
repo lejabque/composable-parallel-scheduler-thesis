@@ -113,15 +113,14 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
   //   });
   // }
   // executeRange(blocks - 1);
-
-  Eigen::Barrier barrier(from - to);
+  Eigen::Barrier barrier(to - from);
   for (size_t i = from; i < to; ++i) {
     EigenPool.Schedule([func, i, &barrier]() {
       func(i);
       barrier.Notify();
     });
   }
-  // todo: main thread?
+  // todo: use main thread?
   barrier.Wait();
 #else
   static_assert(false, "Wrong mode");

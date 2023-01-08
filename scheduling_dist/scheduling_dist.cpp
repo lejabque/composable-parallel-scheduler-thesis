@@ -30,7 +30,7 @@ static std::vector<ScheduledTask> RunWithBarrier(size_t threadNum) {
     // to measure time of all threadNum threads
     while (reported.load() != threadNum) {
       // std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      std::this_thread::yield();
+      // std::this_thread::yield();
     }
   });
   return results;
@@ -68,7 +68,7 @@ static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
     auto spinStart = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - spinStart < sleepFor) {
       // std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      std::this_thread::yield();
+      // std::this_thread::yield();
     }
   });
   return results;

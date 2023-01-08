@@ -49,6 +49,7 @@ list(APPEND OMP_MODES OMP_STATIC
     OMP_GUIDED_MONOTONIC OMP_GUIDED_NONMONOTONIC
     OMP_RUNTIME_MONOTONIC OMP_RUNTIME_NONMONOTONIC)
 list(APPEND TBB_MODES TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY TBB_RAPID)
+list(APPEND EIGEN_MODES EIGEN_SIMPLE EIGEN_RAPID)
 list(APPEND SCHEDULING_MEASURE_MODES SLEEP BARRIER MULTITASK)
 
 foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
@@ -65,7 +66,9 @@ foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
       target_link_libraries(scheduling_dist_${mode}_${scheduling_measure_mode} TBB::tbb)
   endforeach()
   # eigen
-  add_executable(scheduling_dist_EIGEN_${scheduling_measure_mode} scheduling_dist.cpp)
-  target_compile_definitions(scheduling_dist_EIGEN_${scheduling_measure_mode} PRIVATE EIGEN_MODE=1 SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
-  target_link_libraries(scheduling_dist_EIGEN_${scheduling_measure_mode} OpenMP::OpenMP_CXX)
+  foreach(mode IN LISTS EIGEN_MODES)
+      add_executable(scheduling_dist_${mode}_${scheduling_measure_mode} scheduling_dist.cpp)
+      target_compile_definitions(scheduling_dist_${mode}_${scheduling_measure_mode} PRIVATE EIGEN_MODE=${mode} SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
+      target_link_libraries(scheduling_dist_${mode}_${scheduling_measure_mode} OpenMP::OpenMP_CXX TBB::tbb)
+  endforeach()
 endforeach()

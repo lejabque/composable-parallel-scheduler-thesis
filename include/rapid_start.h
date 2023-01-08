@@ -67,11 +67,12 @@ struct work_ {
   std::atomic<uintptr_t> epoch;
   volatile int mode; // 0 - stopping, 1 - rebalance, 2 - trapped
 };
+template <typename Pool = tbb::task_group>
 struct __attribute__((aligned(64))) RapidStart : tbb::detail::padded<mask1>,
                                                  tbb::detail::padded<mask2>,
                                                  tbb::detail::padded<work_> {
   std::atomic<uintptr_t> n_tasks;
-  tbb::task_group tg;
+  Pool tg;
 
   friend class TrapperTask;
 

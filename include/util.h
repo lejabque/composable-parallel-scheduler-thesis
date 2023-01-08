@@ -22,7 +22,7 @@ inline std::string GetParallelMode() {
 }
 
 #ifdef TBB_MODE
-#include "oneapi/tbb/blocked_range.h"
+#include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 #endif
 
@@ -42,7 +42,7 @@ inline int GetNumThreads() {
 #elif defined(SERIAL)
   return 1;
 #elif defined(EIGEN_MODE)
-  return EigenPool.NumThreads();
+  return GetEigenThreadNum();
 #else
   static_assert(false, "Unsupported mode");
 #endif

@@ -80,7 +80,7 @@ list(APPEND OMP_MODES OMP_STATIC
   OMP_GUIDED_MONOTONIC OMP_GUIDED_NONMONOTONIC
   OMP_RUNTIME_MONOTONIC OMP_RUNTIME_NONMONOTONIC)
 list(APPEND TBB_MODES TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY TBB_RAPID)
-# TODO: add rapid start proof of concept for TBB
+list(APPEND EIGEN_MODES EIGEN_SIMPLE EIGEN_RAPID)
 
 list(APPEND BENCHMARKS bench_spmv_balanced bench_spmv_unbalanced bench_reduce bench_scan)
 foreach(bench IN LISTS BENCHMARKS)
@@ -101,9 +101,11 @@ foreach(bench IN LISTS BENCHMARKS)
         target_link_libraries(${bench}_${mode} benchmark::benchmark TBB::tbb)
     endforeach()
     # eigen
-    add_executable(${bench}_EIGEN ${bench}.cpp)
-    target_compile_definitions(${bench}_EIGEN PRIVATE EIGEN_MODE=1)
-    target_link_libraries(${bench}_EIGEN benchmark::benchmark OpenMP::OpenMP_CXX)
+    foreach(mode IN LISTS EIGEN_MODES)
+      add_executable(${bench}_${mode} ${bench}.cpp)
+      target_compile_definitions(${bench}_${mode} PRIVATE EIGEN_MODE=${mode})
+      target_link_libraries(${bench}_${mode} benchmark::benchmark OpenMP::OpenMP_CXX TBB::tbb)
+    endforeach()
 endforeach()
 
 if (ENABLE_TESTS)

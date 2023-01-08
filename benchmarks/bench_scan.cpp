@@ -8,6 +8,7 @@ static constexpr size_t MIN_SIZE = 1 << 10;
 static constexpr size_t MAX_SIZE = 1 << 27;
 
 static void BM_ScanBench(benchmark::State &state) {
+  InitParallel(GetNumThreads());
   size_t size = state.range(0);
   size_t size_pow = Scan::GetBlockPow(size);
   // allocate data and result once, reuse it for all iterations

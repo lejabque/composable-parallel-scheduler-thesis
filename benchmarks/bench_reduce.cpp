@@ -8,6 +8,7 @@ static constexpr size_t MAX_SIZE = 1 << 27;
 static constexpr size_t BLOCK_SIZE = 1 << 7;
 
 static void BM_ReduceBench(benchmark::State &state) {
+  InitParallel(GetNumThreads());
   size_t size = state.range(0);
   auto blocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
   // allocate data and result once, reuse it for all iterations

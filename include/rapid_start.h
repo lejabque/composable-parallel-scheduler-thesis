@@ -161,8 +161,8 @@ public:
     n_tasks--;
     tbb::task::spawn(tl);
 #endif
-    // TODO(vorkdenis): wait all threads are ready, -2 because of main thread
-    tbb::detail::spin_wait_until_eq(start_mask, mask_t((1 << n_tasks) - 2));
+    // TODO(vorkdenis): we shouldn't wait all threads are ready
+    tbb::detail::spin_wait_until_eq(start_mask, mask_t((1ul << n_tasks) - 2));
   }
   ~RapidStart() {
     mode = 0;

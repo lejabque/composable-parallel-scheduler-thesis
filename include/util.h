@@ -1,5 +1,4 @@
 #pragma once
-
 #include "eigen_pool.h"
 #include "modes.h"
 #include "num_threads.h"

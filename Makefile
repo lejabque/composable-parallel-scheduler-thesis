@@ -17,7 +17,10 @@ release_scheduling_dist:
 	cd scheduling_dist && cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -C cmake-build-release -j$(shell nproc)
 
 debug_benchmarks:
-	cd benchmarks && cmake -B cmake-build-debug -S . -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && make -C cmake-build-debug -j$(shell nproc)
+	cd benchmarks && cmake -B cmake-build-debug -S . -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DUSE_SANITIZERS=ON && make -C cmake-build-debug -j$(shell nproc)
+
+debug_scheduling_dist:
+	cd scheduling_dist && cmake -B cmake-build-debug -S . -DENABLE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug && make -C cmake-build-debug -j$(shell nproc)
 
 release: release_benchmarks release_scheduling_dist
 

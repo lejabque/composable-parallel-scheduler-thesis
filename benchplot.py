@@ -107,10 +107,11 @@ def plot_scheduling_dist(scheduling_dist):
         thread_count = len(scheduling_dist[iter])
         task_count = max(max(t["index"] for t in tasks) for tasks in scheduling_dist[iter].values()) + 1
         data = np.ones((thread_count, task_count))
-        for thread_idx, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
+        for thread_id, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
             max_time = max(t["time"] for t in tasks)
             for t in tasks:
-                data[int(thread_idx), t["index"]] = t["time"] / max_time * 0.7
+                idx = thread_count - 1 if thread_id == "-1" else int(thread_id)
+                data[idx, t["index"]] = t["time"] / max_time * 0.7
         ax.imshow(data, cmap='gray', origin='lower')
 
     # plot heatmap thread id, cpu id

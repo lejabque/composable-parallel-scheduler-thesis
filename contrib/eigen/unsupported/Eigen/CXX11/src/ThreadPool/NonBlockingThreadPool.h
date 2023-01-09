@@ -20,24 +20,23 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   typedef typename Environment::Task Task;
   typedef RunQueue<Task, 1024> Queue;
 
-  ThreadPoolTempl(int num_threads, Environment env = Environment())
-      : ThreadPoolTempl(num_threads, true, env) {}
+  ThreadPoolTempl(int num_threads, Environment env = Environment()) : ThreadPoolTempl(num_threads, true, false, env) {}
 
-  ThreadPoolTempl(int num_threads, bool allow_spinning,
-                  Environment env = Environment())
+  ThreadPoolTempl(int num_threads, bool allow_spinning, bool use_main_thread, Environment env = Environment())
       : env_(env),
         num_threads_(num_threads),
         allow_spinning_(allow_spinning),
+        use_main_thread_(use_main_thread),
         thread_data_(num_threads),
         all_coprimes_(num_threads),
-        waiters_(num_threads),
+        waiters_(num_threads - use_main_thread_),
         global_steal_partition_(EncodePartition(0, num_threads_)),
         blocked_(0),
         spinning_(0),
         done_(false),
         cancelled_(false),
         ec_(waiters_) {
-    waiters_.resize(num_threads_);
+    waiters_.resize(num_threads_ - use_main_thread_);
     // Calculate coprimes of all numbers [1, num_threads].
     // Coprimes are used for random walks over all threads in Steal
     // and NonEmptyQueueIndex. Iteration is based on the fact that if we take
@@ -50,20 +49,13 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       all_coprimes_.emplace_back(i);
       ComputeCoprimes(i, &all_coprimes_.back());
     }
-#ifndef EIGEN_THREAD_LOCAL
-    init_barrier_.reset(new Barrier(num_threads_));
-#endif
     thread_data_.resize(num_threads_);
     for (int i = 0; i < num_threads_; i++) {
       SetStealPartition(i, EncodePartition(0, num_threads_));
-      thread_data_[i].thread.reset(
-          env_.CreateThread([this, i]() { WorkerLoop(i); }));
+      if (i >= use_main_thread_) {
+        thread_data_[i].thread.reset(env_.CreateThread([this, i]() { WorkerLoop(i); }));
+      }
     }
-#ifndef EIGEN_THREAD_LOCAL
-    // Wait for workers to initialize per_thread_map_. Otherwise we might race
-    // with them in Schedule or CurrentThreadId.
-    init_barrier_->Wait();
-#endif
   }
 
   ~ThreadPoolTempl() {
@@ -83,8 +75,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     }
     // Join threads explicitly (by destroying) to avoid destruction order within
     // this class.
-    for (size_t i = 0; i < thread_data_.size(); ++i)
-      thread_data_[i].thread.reset();
+    for (size_t i = 0; i < thread_data_.size(); ++i) thread_data_[i].thread.reset();
   }
 
   void SetStealPartitions(const std::vector<std::pair<unsigned, unsigned>>& partitions) {
@@ -101,13 +92,14 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   }
 
   void Schedule(std::function<void()> fn) EIGEN_OVERRIDE {
+    // schedule on main thread only when explicitly requested
     ScheduleWithHint(std::move(fn), 0, num_threads_);
   }
 
-  void ScheduleWithHint(std::function<void()> fn, int start,
-                        int limit) override {
+  void ScheduleWithHint(std::function<void()> fn, int start, int limit) override {
     Task t = env_.CreateTask(std::move(fn));
     PerThread* pt = GetPerThread();
+    // TODO(vorkdenis): don't schedule onto current thread? maybe it's better to do?
     if (pt->pool == this) {
       // Worker thread of this pool, push onto the thread's queue.
       Queue& q = thread_data_[pt->thread_id].queue;
@@ -121,7 +113,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       int rnd = Rand(&pt->rand) % num_queues;
       eigen_plain_assert(start + rnd < limit);
       Queue& q = thread_data_[start + rnd].queue;
-      t = q.PushBack(std::move(t));
+      t = q.PushBack(std::move(t));  // TODO(vorkdenis): try to push front?
     }
     // Note: below we touch this after making w available to worker threads.
     // Strictly speaking, this can lead to a racy-use-after-free. Consider that
@@ -163,6 +155,12 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     }
   }
 
+  void JoinMainThread() {
+    if (use_main_thread_) {
+      WorkerLoop(0);
+    }
+  }
+
  private:
   // Create a single atomic<int> that encodes start and limit information for
   // each thread.
@@ -174,9 +172,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   static const int kMaxPartitionBits = 16;
   static const int kMaxThreads = 1 << kMaxPartitionBits;
 
-  inline unsigned EncodePartition(unsigned start, unsigned limit) {
-    return (start << kMaxPartitionBits) | limit;
-  }
+  inline unsigned EncodePartition(unsigned start, unsigned limit) { return (start << kMaxPartitionBits) | limit; }
 
   inline void DecodePartition(unsigned val, unsigned* start, unsigned* limit) {
     *limit = val & (kMaxThreads - 1);
@@ -194,9 +190,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     thread_data_[i].steal_partition.store(val, std::memory_order_relaxed);
   }
 
-  inline unsigned GetStealPartition(int i) {
-    return thread_data_[i].steal_partition.load(std::memory_order_relaxed);
-  }
+  inline unsigned GetStealPartition(int i) { return thread_data_[i].steal_partition.load(std::memory_order_relaxed); }
 
   void ComputeCoprimes(int N, MaxSizeVector<unsigned>* coprimes) {
     for (int i = 1; i <= N; i++) {
@@ -221,10 +215,6 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     ThreadPoolTempl* pool;  // Parent pool, or null for normal threads.
     uint64_t rand;          // Random generator state.
     int thread_id;          // Worker thread index in pool.
-#ifndef EIGEN_THREAD_LOCAL
-    // Prevent false sharing.
-    char pad_[128];
-#endif
   };
 
   struct ThreadData {
@@ -237,6 +227,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   Environment env_;
   const int num_threads_;
   const bool allow_spinning_;
+  const bool use_main_thread_;
   MaxSizeVector<ThreadData> thread_data_;
   MaxSizeVector<MaxSizeVector<unsigned>> all_coprimes_;
   MaxSizeVector<EventCount::Waiter> waiters_;
@@ -246,36 +237,25 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   std::atomic<bool> done_;
   std::atomic<bool> cancelled_;
   EventCount ec_;
-#ifndef EIGEN_THREAD_LOCAL
-  std::unique_ptr<Barrier> init_barrier_;
-  std::mutex per_thread_map_mutex_;  // Protects per_thread_map_.
-  std::unordered_map<uint64_t, std::unique_ptr<PerThread>> per_thread_map_;
-#endif
 
   // Main worker thread loop.
   void WorkerLoop(int thread_id) {
-#ifndef EIGEN_THREAD_LOCAL
-    std::unique_ptr<PerThread> new_pt(new PerThread());
-    per_thread_map_mutex_.lock();
-    bool insertOK = per_thread_map_.emplace(GlobalThreadIdHash(), std::move(new_pt)).second;
-    eigen_plain_assert(insertOK);
-    EIGEN_UNUSED_VARIABLE(insertOK);
-    per_thread_map_mutex_.unlock();
-    init_barrier_->Notify();
-    init_barrier_->Wait();
-#endif
+    // TODO: init in constructor?
     PerThread* pt = GetPerThread();
     pt->pool = this;
     pt->rand = GlobalThreadIdHash();
     pt->thread_id = thread_id;
     Queue& q = thread_data_[thread_id].queue;
-    EventCount::Waiter* waiter = &waiters_[thread_id];
+    EventCount::Waiter* waiter = nullptr;
+    if (!use_main_thread_ || thread_id != 0) {
+      // main thread does not need a waiter
+      waiter = &waiters_[thread_id - use_main_thread_];
+    }
     // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is
     // proportional to num_threads_ and we assume that new work is scheduled at
     // a constant rate, so we set spin_count to 5000 / num_threads_. The
     // constant was picked based on a fair dice roll, tune it.
-    const int spin_count =
-        allow_spinning_ && num_threads_ > 0 ? 5000 / num_threads_ : 0;
+    const int spin_count = allow_spinning_ && num_threads_ > 0 ? 5000 / num_threads_ : 0;
     if (num_threads_ == 1) {
       // For num_threads_ == 1 there is no point in going through the expensive
       // steal loop. Moreover, since NonEmptyQueueIndex() calls PopBack() on the
@@ -307,7 +287,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
           if (!t.f) {
             t = GlobalSteal();
             if (!t.f) {
-              // Leave one thread spinning. This reduces latency.
+              // Leave one thread spinning. This reduces latency. TODO(vorkdenis): Also spin when our thread is main?
               if (allow_spinning_ && !spinning_ && !spinning_.exchange(true)) {
                 for (int i = 0; i < spin_count && !t.f; i++) {
                   if (!cancelled_.load(std::memory_order_relaxed)) {
@@ -316,9 +296,14 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
                     return;
                   }
                 }
-                spinning_ = false;
+                if (!use_main_thread_ || thread_id != 0) {
+                  spinning_ = false;
+                }
               }
               if (!t.f) {
+                if (!waiter) {
+                  return;  // TODO(vorkdenis): wait for work more? or just dont schedule main thread?
+                }
                 if (!WaitForWork(waiter, &t)) {
                   return;
                 }
@@ -341,9 +326,9 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     unsigned r = Rand(&pt->rand);
     // Reduce r into [0, size) range, this utilizes trick from
     // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-    eigen_plain_assert(all_coprimes_[size - 1].size() < (1<<30));
+    eigen_plain_assert(all_coprimes_[size - 1].size() < (1 << 30));
     unsigned victim = ((uint64_t)r * (uint64_t)size) >> 32;
-    unsigned index = ((uint64_t) all_coprimes_[size - 1].size() * (uint64_t)r) >> 32;
+    unsigned index = ((uint64_t)all_coprimes_[size - 1].size() * (uint64_t)r) >> 32;
     unsigned inc = all_coprimes_[size - 1][index];
 
     for (unsigned i = 0; i < size; i++) {
@@ -375,10 +360,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   }
 
   // Steals work from any other thread in the pool.
-  Task GlobalSteal() {
-    return Steal(0, num_threads_);
-  }
-
+  Task GlobalSteal() { return Steal(0, num_threads_); }
 
   // WaitForWork blocks until new work is available (returns true), or if it is
   // time to exit (returns false). Can optionally return a task to execute in t
@@ -404,7 +386,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     // that's we are done.
     blocked_++;
     // TODO is blocked_ required to be unsigned?
-    if (done_ && blocked_ == static_cast<unsigned>(num_threads_)) {
+    if (done_ && blocked_ == static_cast<unsigned>(num_threads_ - use_main_thread_)) {
       ec_.CancelWait();
       // Almost done, but need to re-check queues.
       // Consider that all queues are empty and all worker threads are preempted
@@ -456,19 +438,9 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   }
 
   EIGEN_STRONG_INLINE PerThread* GetPerThread() {
-#ifndef EIGEN_THREAD_LOCAL
-    static PerThread dummy;
-    auto it = per_thread_map_.find(GlobalThreadIdHash());
-    if (it == per_thread_map_.end()) {
-      return &dummy;
-    } else {
-      return it->second.get();
-    }
-#else
-    EIGEN_THREAD_LOCAL PerThread per_thread_;
+    static thread_local PerThread per_thread_;
     PerThread* pt = &per_thread_;
     return pt;
-#endif
   }
 
   static EIGEN_STRONG_INLINE unsigned Rand(uint64_t* state) {
@@ -476,8 +448,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     // Update the internal state
     *state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
     // Generate the random output (using the PCG-XSH-RS scheme)
-    return static_cast<unsigned>((current ^ (current >> 22)) >>
-                                 (22 + (current >> 61)));
+    return static_cast<unsigned>((current ^ (current >> 22)) >> (22 + (current >> 61)));
   }
 };
 

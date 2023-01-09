@@ -137,9 +137,6 @@ PrintResults(size_t threadNum,
 
 int main(int argc, char **argv) {
   auto threadNum = GetNumThreads();
-  if (argc > 1) {
-    threadNum = std::stoi(argv[1]);
-  }
   InitParallel(threadNum);
   RunOnce(threadNum); // just for warmup
 

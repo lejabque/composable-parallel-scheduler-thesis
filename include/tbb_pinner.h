@@ -19,5 +19,8 @@ public:
     if (sched_setaffinity(0, mask_size, mask)) {
       std::cerr << "Error in sched_setaffinity" << std::endl;
     }
+    CPU_FREE(mask);
   }
+
+  ~PinningObserver() { observe(false); }
 };

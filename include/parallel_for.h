@@ -2,7 +2,10 @@
 
 #include "eigen_pool.h"
 #include "modes.h"
+#include "timespan_partitioner.h"
 #include "util.h"
+#include <algorithm>
+#include <utility>
 
 #if TBB_MODE == TBB_RAPID
 #include "rapid_start.h"
@@ -18,6 +21,10 @@ inline Harness::RapidStart<EigenPoolWrapper> RapidGroup;
 #include "tbb_pinner.h"
 #endif
 
+#ifdef EIGEN_MODE
+#include "eigen_pinner.h"
+#endif
+
 inline void InitParallel(size_t threadsNum) {
 #if TBB_MODE == TBB_RAPID || EIGEN_MODE == EIGEN_RAPID
   RapidGroup.init(threadsNum);
@@ -30,6 +37,11 @@ inline void InitParallel(size_t threadsNum) {
 #ifdef OMP_MODE
   omp_set_num_threads(threadsNum);
 #endif
+#ifdef EIGEN_MODE
+#if EIGEN_MODE != EIGEN_RAPID
+  static EigenPinner pinner(threadsNum);
+#endif
+#endif
 }
 
 #ifdef EIGEN_MODE
@@ -37,26 +49,11 @@ inline void InitParallel(size_t threadsNum) {
 template <typename F>
 inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 #if EIGEN_MODE == EIGEN_SIMPLE
-  size_t blocks = GetNumThreads();
-  size_t blockSize = (to - from + blocks - 1) / blocks;
-  Eigen::Barrier barrier(blocks - 1);
-  for (size_t i = 0; i < blocks - 1; ++i) {
-    size_t start = from + i * blockSize;
-    size_t end = std::min(start + blockSize, to);
-    EigenPool.ScheduleWithHint(
-        [func, start, end, &barrier]() {
-          for (size_t i = start; i < end; ++i) {
-            func(i);
-          }
-          barrier.Notify();
-        },
-        i, i + 1);
-  }
-  // main thread
-  for (size_t i = from + (blocks - 1) * blockSize; i < to; ++i) {
-    func(i);
-  }
-  barrier.Wait();
+  EigenPartitioner::ParallelForSimple<EigenPoolWrapper>(from, to,
+                                                        std::forward<F>(func));
+#elif EIGEN_MODE == EIGEN_TIMESPAN
+  EigenPartitioner::ParallelForTimespan<EigenPoolWrapper>(
+      from, to, std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_RAPID
   RapidGroup.parallel_ranges(from, to, [&func](auto from, auto to, auto part) {
     for (size_t i = from; i != to; ++i) {

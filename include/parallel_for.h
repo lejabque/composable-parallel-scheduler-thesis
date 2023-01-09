@@ -14,9 +14,16 @@ inline Harness::RapidStart RapidGroup;
 inline Harness::RapidStart<EigenPoolWrapper> RapidGroup;
 #endif
 
+#ifdef TBB_MODE
+#include "tbb_pinner.h"
+#endif
+
 inline void InitParallel(size_t threadsNum) {
 #if TBB_MODE == TBB_RAPID || EIGEN_MODE == EIGEN_RAPID
   RapidGroup.init(threadsNum);
+#endif
+#ifdef TBB_MODE
+  static PinningObserver pinner; // just init observer
 #endif
 }
 

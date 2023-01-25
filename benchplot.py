@@ -106,12 +106,10 @@ def plot_scheduling_dist(scheduling_dist):
         thread_count = len(scheduling_dist[iter])
         task_count = max(max(t["index"] for t in tasks) for tasks in scheduling_dist[iter].values()) + 1
         data = np.ones((thread_count, task_count))
-        total = 0
-        for _, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
+        for thread_idx, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
             max_time = max(t["time"] for t in tasks)
             for t in tasks:
-                data[total, t["index"]] = t["time"] / max_time * 0.7
-            total += 1  # todo: order?
+                data[int(thread_idx), t["index"]] = t["time"] / max_time * 0.7
         ax.imshow(data, cmap='gray', origin='lower')
 
     # plot heatmap thread id, cpu id
@@ -152,9 +150,9 @@ def plot_scheduling_dist(scheduling_dist):
 
 if __name__ == "__main__":
     # fetch folder from args or use current folder
-    folder_name = sys.argv[1] if len(sys.argv) > 1 else "bench_results"
+    folder_name = sys.argv[1] if len(sys.argv) > 1 else "raw_results"
     benchmarks = parse_benchmarks(folder_name)
-    res_path = os.path.join(folder_name, "images")
+    res_path = sys.argv[2] if len(sys.argv) > 2 else "bench_results"
     if not os.path.exists(res_path):
         os.makedirs(res_path)
 
@@ -199,6 +197,6 @@ if __name__ == "__main__":
                 for thread_id, tasks in iter.items():
                     unique_cpus = set(t["cpu"] for t in tasks)
                     if len(unique_cpus) > 1:
-                        print(f"{bench_mode}: {thread_id} has tasks on different cpus: {unique_cpus}")
+                        print(f"{bench_mode}: thread {thread_id} has tasks executed on differenet cpus: {unique_cpus}")
             fig.savefig(os.path.join(res_path, "scheduling_dist_" + bench_mode + '.png'), bbox_inches='tight')
             plt.close()

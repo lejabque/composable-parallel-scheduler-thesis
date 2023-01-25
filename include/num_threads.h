@@ -7,7 +7,7 @@
 
 inline int GetNumThreads() {
   // cache result to avoid calling getenv on every call
-  static int threads = []() {
+  static int threads = []() -> int {
     if (const char *envThreads = std::getenv("BENCH_NUM_THREADS")) {
       return std::stoi(envThreads);
     }

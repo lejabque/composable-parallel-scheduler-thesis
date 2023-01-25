@@ -25,32 +25,32 @@ clean:
 	rm -rf cmake-build-* benchmarks/cmake-build-* scheduling_dist/cmake-build-*
 
 clean_bench:
-	rm -rf bench_results/*
+	rm -rf raw_results/*
 
 bench_dir:
-	mkdir -p bench_results
+	mkdir -p raw_results
 
 # todo: separate balanced/unbalanced
 bench_spmv:
 	@echo ----------------------------------------------------------------------------
 	@echo "Bench\tRows\tColumns            \tIters\tTime\tCPU\tUnit"
 	@echo ----------------------------------------------------------------------------
-	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_spmv_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=bench_results/$$x.json; done
+	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_spmv_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=raw_results/$$x.json; done
 
 bench_reduce:
 	@echo ----------------------------------------------------------------------------
 	@echo "Bench\tRows\tColumns            \tIters\tTime\tCPU\tUnit"
 	@echo ----------------------------------------------------------------------------
-	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_reduce_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=bench_results/$$x.json; done
+	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_reduce_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=raw_results/$$x.json; done
 
 bench_scan:
 	@echo ----------------------------------------------------------------------------
 	@echo "Bench\tRows\tColumns            \tIters\tTime\tCPU\tUnit"
 	@echo ----------------------------------------------------------------------------
-	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_scan_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=bench_results/$$x.json; done
+	@for x in $(shell ls -1 benchmarks/cmake-build-release/bench_scan_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) $(NUMACTL_BIND) benchmarks/cmake-build-release/$$x --benchmark_out_format=json --benchmark_out=raw_results/$$x.json; done
 
 run_scheduling_dist:
-	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) $(NUMACTL_BIND) scheduling_dist/cmake-build-release/$$x > bench_results/$$x.json; done
+	@for x in $(shell ls -1 scheduling_dist/cmake-build-release/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) $(NUMACTL_BIND) scheduling_dist/cmake-build-release/$$x > raw_results/$$x.json; done
 
 bench: clean_bench bench_dir release_benchmarks bench_spmv bench_reduce bench_scan run_scheduling_dist
 

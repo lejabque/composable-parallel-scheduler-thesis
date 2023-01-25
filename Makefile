@@ -8,7 +8,7 @@ ifeq ($(UNAME_S),Linux)
 	NUMACTL_BIND = numactl -N 0
 endif
 
-OMP_FLAGS := OMP_WAIT_POLICY=active KMP_BLOCKTIME=infinite OMP_PROC_BIND=close
+OMP_FLAGS := OMP_WAIT_POLICY=active KMP_BLOCKTIME=infinite OMP_PROC_BIND=close LIBOMP_NUM_HIDDEN_HELPER_THREADS=0
 
 release_benchmarks:
 	cd benchmarks && cmake -B cmake-build-release -S . -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -C cmake-build-release -j$(shell nproc)

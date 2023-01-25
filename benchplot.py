@@ -101,6 +101,7 @@ def plot_scheduling_dist(scheduling_dist):
         ax = fig.add_subplot(gs[iter, 0])
         ax.set_ylabel("Thread")
         ax.set_xlabel("Task")
+        ax.xaxis.set_label_position('top')
         # ax.get_figure().tight_layout()
 
         thread_count = len(scheduling_dist[iter])
@@ -117,6 +118,7 @@ def plot_scheduling_dist(scheduling_dist):
         ax = fig.add_subplot(gs[iter, 1])
         ax.set_ylabel("Thread")
         ax.set_xlabel("Cpu")
+        ax.xaxis.set_label_position('top')
         # ax.get_figure().tight_layout()
 
         thread_count = len(scheduling_dist[iter].keys())

@@ -13,6 +13,8 @@ make clean
 make release
 make bench # runs benchmarks and saves results to ./bench_results
 ```
+Depenping on runtime, the approtiate way to determine max number of threads will be used.
+You can limit the number of threads by setting the environment variable `BENCH_NUM_THREADS`.
 
 ## Plot results
 ```bash

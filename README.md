@@ -18,7 +18,6 @@ You can limit the number of threads by setting the environment variable `BENCH_N
 
 ## Plot results
 ```bash
-conda env create -f benchplot.yml
-conda activate benchplot
+conda activate benchmarks
 python3 benchplot.py # plots benchmark results and saves images to ./bench_results/images
 ```

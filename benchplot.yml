@@ -1,8 +1,0 @@
-name: benchplot
-channels:
-  - conda-forge
-dependencies:
-  - matplotlib
-  - numpy
-  - seaborn
-

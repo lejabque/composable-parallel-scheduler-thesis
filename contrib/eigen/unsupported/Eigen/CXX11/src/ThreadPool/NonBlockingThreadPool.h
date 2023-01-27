@@ -284,35 +284,18 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
         Task t = q.PopFront();
         if (!t.f) {
           t = LocalSteal();
-          if (!t.f) {
-            t = GlobalSteal();
-            if (!t.f) {
-              // Leave one thread spinning. This reduces latency. TODO(vorkdenis): Also spin when our thread is main?
-              if (allow_spinning_ && !spinning_ && !spinning_.exchange(true)) {
-                for (int i = 0; i < spin_count && !t.f; i++) {
-                  if (!cancelled_.load(std::memory_order_relaxed)) {
-                    t = GlobalSteal();
-                  } else {
-                    return;
-                  }
-                }
-                if (!use_main_thread_ || thread_id != 0) {
-                  spinning_ = false;
-                }
-              }
-              if (!t.f) {
-                if (!waiter) {
-                  return;  // TODO(vorkdenis): wait for work more? or just dont schedule main thread?
-                }
-                if (!WaitForWork(waiter, &t)) {
-                  return;
-                }
-              }
-            }
-          }
+        }
+        if (!t.f) {
+          t = GlobalSteal();
+        }
+        if (!t.f && use_main_thread_ && thread_id == 0) {
+          // Main thread shouldn't wait for work, it should just exit.
+          return;
         }
         if (t.f) {
           env_.ExecuteTask(t);
+        } else if (done_) {
+          return;
         }
       }
     }

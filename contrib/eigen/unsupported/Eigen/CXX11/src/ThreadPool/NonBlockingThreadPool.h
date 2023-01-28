@@ -96,10 +96,20 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     ScheduleWithHint(std::move(fn), 0, num_threads_);
   }
 
+  void RunOnThread(std::function<void()> fn, size_t threadIndex) {
+    Task t = env_.CreateTask(std::move(fn));
+    threadIndex = threadIndex % num_threads_;
+    Queue& q = thread_data_[threadIndex].mailbox;
+    t = q.PushBack(std::move(t));
+    if (t.f) {
+      // failed to push, execute directly
+      env_.ExecuteTask(t);
+    }
+  }
+
   void ScheduleWithHint(std::function<void()> fn, int start, int limit) override {
     Task t = env_.CreateTask(std::move(fn));
     PerThread* pt = GetPerThread();
-    // TODO(vorkdenis): don't schedule onto current thread? maybe it's better to do?
     if (pt->pool == this) {
       // Worker thread of this pool, push onto the thread's queue.
       Queue& q = thread_data_[pt->thread_id].queue;
@@ -222,6 +232,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
     Queue queue;
+    Queue mailbox;
   };
 
   Environment env_;
@@ -246,6 +257,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     pt->rand = GlobalThreadIdHash();
     pt->thread_id = thread_id;
     Queue& q = thread_data_[thread_id].queue;
+    Queue& mailbox = thread_data_[thread_id].mailbox;
     EventCount::Waiter* waiter = nullptr;
     if (!use_main_thread_ || thread_id != 0) {
       // main thread does not need a waiter
@@ -264,7 +276,10 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       // counter-productive for the types of I/O workloads the single thread
       // pools tend to be used for.
       while (!cancelled_) {
-        Task t = q.PopFront();
+        Task t = mailbox.PopFront();
+        if (!t.f) {
+          t = q.PopFront();
+        }
         for (int i = 0; i < spin_count && !t.f; i++) {
           if (!cancelled_.load(std::memory_order_relaxed)) {
             t = q.PopFront();
@@ -281,7 +296,11 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       }
     } else {
       while (!cancelled_) {
-        Task t = q.PopFront();
+        // check mailbox at first
+        Task t = mailbox.PopFront();
+        if (!t.f) {
+          t = q.PopFront();
+        }
         if (!t.f) {
           t = LocalSteal();
         }

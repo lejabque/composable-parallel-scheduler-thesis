@@ -24,7 +24,7 @@ public:
   }
 
   template <typename F> void run_on_thread(F &&f, size_t hint) {
-    EigenPool.ScheduleWithHint(std::forward<F>(f), hint, hint + 1);
+    EigenPool.RunOnThread(std::forward<F>(f), hint);
   }
 
   void join_main_thread() { EigenPool.JoinMainThread(); }

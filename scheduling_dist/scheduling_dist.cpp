@@ -39,38 +39,23 @@ static std::vector<ScheduledTask> RunWithBarrier(size_t threadNum) {
     // it's ok to block here because we want
     // to measure time of all threadNum threads
     while (reported.load(std::memory_order_relaxed) != threadNum) {
-      // we don't sleep or yield here because we want to use cpu
-      // like it's real workload
+      CpuRelax();
     }
   });
   return results;
 }
 
-static std::vector<ScheduledTask> RunWithSpin(size_t threadNum) {
-  std::vector<ScheduledTask> results(threadNum);
+static std::vector<ScheduledTask> RunWithSpin(size_t threadNum,
+                                              size_t tasksPerThread = 1) {
+  uint64_t spinPerIter = 100'000'000 / tasksPerThread;
+  auto tasksCount = threadNum * tasksPerThread;
+  std::vector<ScheduledTask> results(tasksCount);
   auto start = Now();
-  ParallelFor(0, threadNum, [&](size_t i) {
+  ParallelFor(0, tasksCount, [&](size_t i) {
     results[i] = ScheduledTask(i, start);
     // emulating work
-    volatile uint64_t x = 0; // prevent compiler from optimizing out
-    for (size_t i = 0; i < 100'000'000; ++i) {
-      x += i;
-    }
-  });
-  return results;
-}
-
-static std::vector<ScheduledTask> RunMultitask(size_t threadNum) {
-  uint64_t totalSpin = 1'000'000'000;
-  auto tasksNum = threadNum * 100;
-  std::vector<ScheduledTask> results(tasksNum);
-  auto start = Now();
-  ParallelFor(0, tasksNum, [&](size_t i) {
-    results[i] = ScheduledTask(i, start);
-    // emulating work
-    volatile uint64_t x = 0; // prevent compiler from optimizing out
-    for (size_t i = 0; i < totalSpin / tasksNum; ++i) {
-      x += i;
+    for (size_t i = 0; i < spinPerIter; ++i) {
+      CpuRelax();
     }
   });
   return results;
@@ -95,7 +80,7 @@ static std::vector<ScheduledTask> RunOnce(size_t threadNum) {
 #elif SCHEDULING_MEASURE_MODE == SPIN
   return RunWithSpin(threadNum);
 #elif SCHEDULING_MEASURE_MODE == MULTITASK
-  return RunMultitask(threadNum);
+  return RunWithSpin(threadNum, 100);
 #else
   static_assert(false, "Unsupported mode");
 #endif

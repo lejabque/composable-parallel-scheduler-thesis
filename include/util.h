@@ -18,7 +18,7 @@ inline int GetThreadIndex() {
 #elif defined(EIGEN_MODE)
   return EigenPool.CurrentThreadId();
 #else
-  static_assert(false, "Unsupported mode");
+#error "Unsupported mode"
 #endif
 }
 
@@ -32,6 +32,16 @@ inline Timestamp Now() {
   asm volatile("mrs %0, cntvct_el0" : "=r"(val));
   return val;
 #else
-  static_assert(false, "Unsupported architecture");
+#error "Unsupported architecture
+#endif
+}
+
+inline void CpuRelax() {
+#if defined(__x86_64__)
+  asm volatile("pause\n" : : : "memory");
+#elif defined(__aarch64__)
+  asm volatile("yield\n" : : : "memory");
+#else
+#error "Unsupported architecture"
 #endif
 }

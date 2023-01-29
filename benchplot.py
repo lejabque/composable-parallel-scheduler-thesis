@@ -68,7 +68,6 @@ def plot_scheduling_benchmarks(scheduling_times):
     min_times = [(bench_type, [[min([t["time"] for t in times]) for times in iter.values()] for iter in results]) for bench_type, results in scheduling_times.items()]
     # print(list(scheduling_times.items())[0][1][0])
     # items = [(bench_type, [[t["time"] for t in iter.values()] for iter in tasks]) for bench_type, tasks in scheduling_times.items()]
-    lines = ["-", "--", "-.", ":"]
     runtimes = list(set(name.split("_")[0] for (name, _) in min_times))
     # group by prefix:
     rows = len(runtimes) + 1
@@ -89,10 +88,11 @@ def plot_scheduling_benchmarks(scheduling_times):
         stds = np.std(times, axis=0)
         # print(bench_type, means, stds)
         # TODO: plot stds?
-        style = random.choice(lines)
-        runtime_ax.plot(range(len(means)), means, label=bench_type, linestyle=style)
+        style = random.choice(["-", "--", "-.", ":"])
+        color = random.choice(["b", "g", "r", "c", "m", "y", "k"])
+        runtime_ax.plot(range(len(means)), means, label=bench_type, linestyle=style, color=color)
         # all in one plot
-        ax[-1].plot(range(len(means)), means, label=bench_type, linestyle=style)
+        ax[-1].plot(range(len(means)), means, label=bench_type, linestyle=style, color=color)
 
 
     for runtime in runtimes:

@@ -2,7 +2,7 @@ list(APPEND TESTS scan_tests spmv_tests)
 
 get_filename_component(PARENT_DIR ../ ABSOLUTE)
 include_directories(${PARENT_DIR})
-
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 foreach(test IN LISTS TESTS)
   # serial
@@ -20,5 +20,14 @@ foreach(test IN LISTS TESTS)
       add_executable(${test}_${mode} ${test}.cpp)
       target_compile_definitions(${test}_${mode} PRIVATE TBB_MODE=${mode})
       target_link_libraries(${test}_${mode} gtest ${GTEST_MAIN_LIBRARIES} TBB::tbb)
+  endforeach()
+  # eigen
+  foreach(mode IN LISTS EIGEN_MODES)
+      add_executable(${test}_${mode} ${test}.cpp)
+      target_compile_definitions(${test}_${mode} PRIVATE EIGEN_MODE=${mode})
+      target_link_libraries(${test}_${mode} gtest ${GTEST_MAIN_LIBRARIES} TBB::tbb)
+      if (mode MATCHES "EIGEN_RAPID")
+        target_link_libraries(${test}_${mode} TBB::tbb)
+      endif()
   endforeach()
 endforeach()

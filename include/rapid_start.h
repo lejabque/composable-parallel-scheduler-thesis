@@ -19,7 +19,6 @@ typedef uintptr_t mask_t;
 
 namespace Harness {
 const size_t MAX_THREADS = sizeof(mask_t) * 8;
-using tbb_task = tbb::detail::d1::task;
 
 class distribution_base {
 public:

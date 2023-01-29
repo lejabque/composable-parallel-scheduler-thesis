@@ -65,27 +65,44 @@ def parse_benchmarks(folder_name):
 
 def plot_scheduling_benchmarks(scheduling_times):
     # x for thread_idx, y for time
-    fig, ax = plt.subplots(1, 1, figsize=(18, 6))
     min_times = [(bench_type, [[min([t["time"] for t in times]) for times in iter.values()] for iter in results]) for bench_type, results in scheduling_times.items()]
     # print(list(scheduling_times.items())[0][1][0])
     # items = [(bench_type, [[t["time"] for t in iter.values()] for iter in tasks]) for bench_type, tasks in scheduling_times.items()]
     lines = ["-", "--", "-.", ":"]
+    runtimes = list(set(name.split("_")[0] for (name, _) in min_times))
+    # group by prefix:
+    rows = len(runtimes) + 1
+    cols = 1
+    width = 18
+    height = width / 3 * rows
+    fig, ax = plt.subplots(rows, cols, figsize=(width, height))
     for bench_type, times in reversed(sorted(min_times,
                                  key=lambda x: np.max(np.mean(np.asarray(x[1]), axis=0)))):
         # todo: better way to visualize?
         # min time per thread for each idx in range of thread count
         times = np.asarray(times)
+        # plot distribution of all times for iterations as scatter around time
+        runtime_ax = ax[runtimes.index(bench_type.split("_")[0])]
         means = np.min(times, axis=0)
         # sort means array
         means = np.sort(means, axis=0)
         stds = np.std(times, axis=0)
         # print(bench_type, means, stds)
-        # TODO: plot stds
-        ax.plot(range(len(means)), means, label=bench_type, linestyle=random.choice(lines))
-    ax.set_title("Scheduling time")
-    ax.set_xlabel("Index of thread")
-    ax.set_ylabel("Clock ticks")
-    ax.legend()
+        # TODO: plot stds?
+        style = random.choice(lines)
+        runtime_ax.plot(range(len(means)), means, label=bench_type, linestyle=style)
+        # all in one plot
+        ax[-1].plot(range(len(means)), means, label=bench_type, linestyle=style)
+
+
+    for runtime in runtimes:
+        idx = runtimes.index(runtime)
+        ax[idx].set_title("Scheduling time, " + runtime)
+    ax[-1].set_title("Scheduling time, all")
+    for runtime_ax in ax:
+        runtime_ax.set_xlabel("Index of thread (sorted by time of first task)")
+        runtime_ax.set_ylabel("Time, us")
+        runtime_ax.legend()
     return fig
 
 

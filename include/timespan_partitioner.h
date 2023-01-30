@@ -128,14 +128,14 @@ private:
 
 template <typename Sched, bool UseTimespan, typename F>
 auto MakeInitialTask(Sched &sched, size_t from, size_t to, F &&func,
-                     size_t threadCount) {
+                     size_t threadCount, size_t grainSize = 1) {
   return Task<Sched, F, UseTimespan, true>{
       sched, from, to, std::forward<F>(func),
-      SplitData{0, GetLog2(threadCount) + 1, threadCount}};
+      SplitData{0, GetLog2(threadCount) + 1, threadCount, grainSize}};
 }
 
 template <typename Sched, bool UseTimespan, typename F>
-void ParallelFor(size_t from, size_t to, F &&func) {
+void ParallelFor(size_t from, size_t to, F &&func, size_t grainSize = 1) {
   Sched sched;
   Eigen::Barrier barrier(to - from);
   auto task = MakeInitialTask<Sched, UseTimespan>(
@@ -151,13 +151,14 @@ void ParallelFor(size_t from, size_t to, F &&func) {
 }
 
 template <typename Sched, typename F>
-void ParallelForTimespan(size_t from, size_t to, F &&func) {
-  ParallelFor<Sched, true, F>(from, to, std::forward<F>(func));
+void ParallelForTimespan(size_t from, size_t to, F &&func,
+                         size_t grainSize = 1) {
+  ParallelFor<Sched, true, F>(from, to, std::forward<F>(func), grainSize);
 }
 
 template <typename Sched, typename F>
-void ParallelForSimple(size_t from, size_t to, F &&func) {
-  ParallelFor<Sched, false, F>(from, to, std::forward<F>(func));
+void ParallelForSimple(size_t from, size_t to, F &&func, size_t grainSize = 1) {
+  ParallelFor<Sched, false, F>(from, to, std::forward<F>(func), grainSize);
 }
 
 template <typename Sched, typename F>

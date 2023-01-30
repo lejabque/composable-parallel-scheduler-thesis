@@ -47,13 +47,14 @@ inline void InitParallel(size_t threadsNum) {
 #ifdef EIGEN_MODE
 // TODO: move to eigen header
 template <typename F>
-inline void EigenParallelFor(size_t from, size_t to, F &&func) {
+inline void EigenParallelFor(size_t from, size_t to, F &&func,
+                             size_t grainSize = 1) {
 #if EIGEN_MODE == EIGEN_SIMPLE
-  EigenPartitioner::ParallelForSimple<EigenPoolWrapper>(from, to,
-                                                        std::forward<F>(func));
+  EigenPartitioner::ParallelForSimple<EigenPoolWrapper>(
+      from, to, std::forward<F>(func), grainSize);
 #elif EIGEN_MODE == EIGEN_TIMESPAN
   EigenPartitioner::ParallelForTimespan<EigenPoolWrapper>(
-      from, to, std::forward<F>(func));
+      from, to, std::forward<F>(func), grainSize);
 #elif EIGEN_MODE == EIGEN_STATIC
   EigenPartitioner::ParallelForStatic<EigenPoolWrapper>(from, to,
                                                         std::forward<F>(func));
@@ -70,7 +71,8 @@ inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 #endif
 
 // TODO: move out some initializations from body to avoid init overhead?
-template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
+template <typename Func>
+void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
 #if defined(SERIAL)
   for (size_t i = from; i < to; ++i) {
     func(i);
@@ -137,7 +139,7 @@ template <typename Func> void ParallelFor(size_t from, size_t to, Func &&func) {
     func(i);
   }
 #elif defined(EIGEN_MODE)
-  EigenParallelFor(from, to, func);
+  EigenParallelFor(from, to, func, grainSize);
 #else
   static_assert(false, "Wrong mode");
 #endif

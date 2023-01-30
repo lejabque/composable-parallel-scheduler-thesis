@@ -39,20 +39,20 @@ T MultiplyRow(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
 
 template <typename T>
 void MultiplyMatrix(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
-                    std::vector<T> &out) {
+                    std::vector<T> &out, size_t grainSize = 1) {
   ParallelFor(0, A.Dimensions.Rows,
-              [&](size_t i) { out[i] = MultiplyRow(A, x, i); });
+              [&](size_t i) { out[i] = MultiplyRow(A, x, i); }, grainSize);
 }
 
 template <typename T>
 void MultiplyMatrix(const SPMV::DenseMatrix<T> &A, const std::vector<T> &x,
-                    std::vector<T> &out) {
+                    std::vector<T> &out, size_t grainSize = 1) {
   ParallelFor(0, A.Dimensions.Rows, [&](size_t i) {
     out[i] = 0;
     for (size_t j = 0; j != A.Dimensions.Columns; ++j) {
       out[i] += A.Data[i][j] * x[j];
     }
-  });
+  }, grainSize);
 }
 
 template <typename T>

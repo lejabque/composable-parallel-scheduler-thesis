@@ -16,7 +16,7 @@ static void BM_SpmvBenchBalanced(benchmark::State &state) {
   // allocate result only once
   std::vector<double> y(A.Dimensions.Rows);
   for (auto _ : state) {
-    MultiplyMatrix(A, x, y);
+    MultiplyMatrix(A, x, y, 128*128);
   }
 }
 

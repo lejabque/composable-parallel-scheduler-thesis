@@ -40,19 +40,23 @@ T MultiplyRow(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
 template <typename T>
 void MultiplyMatrix(const SPMV::SparseMatrixCSR<T> &A, const std::vector<T> &x,
                     std::vector<T> &out, size_t grainSize = 1) {
-  ParallelFor(0, A.Dimensions.Rows,
-              [&](size_t i) { out[i] = MultiplyRow(A, x, i); }, grainSize);
+  ParallelFor(
+      0, A.Dimensions.Rows, [&](size_t i) { out[i] = MultiplyRow(A, x, i); },
+      grainSize);
 }
 
 template <typename T>
 void MultiplyMatrix(const SPMV::DenseMatrix<T> &A, const std::vector<T> &x,
                     std::vector<T> &out, size_t grainSize = 1) {
-  ParallelFor(0, A.Dimensions.Rows, [&](size_t i) {
-    out[i] = 0;
-    for (size_t j = 0; j != A.Dimensions.Columns; ++j) {
-      out[i] += A.Data[i][j] * x[j];
-    }
-  }, grainSize);
+  ParallelFor(
+      0, A.Dimensions.Rows,
+      [&](size_t i) {
+        out[i] = 0;
+        for (size_t j = 0; j != A.Dimensions.Columns; ++j) {
+          out[i] += A.Data[i][j] * x[j];
+        }
+      },
+      grainSize);
 }
 
 template <typename T>
@@ -85,7 +89,8 @@ void DensePmvSerial(const DenseMatrix<T> &A, const std::vector<T> &x,
 
 enum class SparseKind {
   BALANCED,
-  UNBALANCED,
+  TRIANGLE,
+  HYPERBOLIC,
 };
 
 inline thread_local std::default_random_engine RandomGenerator{
@@ -108,7 +113,7 @@ SparseMatrixCSR<T> GenSparseMatrix(size_t n, size_t m, double density) {
       size_t pos = posGen(RandomGenerator);
       positions.insert({pos / m, pos % m});
     }
-  } else if constexpr (Kind == SparseKind::UNBALANCED) {
+  } else if constexpr (Kind == SparseKind::HYPERBOLIC) {
     auto posGen = std::uniform_int_distribution<size_t>(0, m - 1);
     for (size_t i = 0; i != n; ++i) {
       // sum of elementsCount = density * n * m / std::log(n + 1) * (1 + 1/2 +
@@ -119,10 +124,23 @@ SparseMatrixCSR<T> GenSparseMatrix(size_t n, size_t m, double density) {
         positions.insert({i, pos});
       }
     }
+  } else if constexpr (Kind == SparseKind::TRIANGLE) {
+    auto posGen = std::uniform_int_distribution<size_t>(0, n * m - 1);
+    for (size_t i = 0; i < n * m * density; ++i) {
+      size_t pos = posGen(RandomGenerator);
+      auto x = pos / m;
+      auto y = pos % m;
+      if (x <= y) {
+        positions.insert({x, y});
+      } else {
+        positions.insert({y, x});
+      }
+    }
   } else {
     // check that all possible kinds are handled
     static_assert(Kind == SparseKind::BALANCED ||
-                  Kind == SparseKind::UNBALANCED);
+                  Kind == SparseKind::HYPERBOLIC ||
+                  Kind == SparseKind::TRIANGLE);
   }
 
   out.RowIndex.reserve(n + 1);

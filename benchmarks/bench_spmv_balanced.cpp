@@ -6,7 +6,9 @@
 
 using namespace SPMV;
 
-static constexpr size_t MATRIX_SIZE = 1 << 16;
+static constexpr size_t MATRIX_SIZE =
+    1 << 16; // TODO: maybe use smaller matrix to make it faster and make
+             // overheads more visible?
 
 static void BM_SpmvBenchBalanced(benchmark::State &state) {
   InitParallel(GetNumThreads());
@@ -16,7 +18,7 @@ static void BM_SpmvBenchBalanced(benchmark::State &state) {
   // allocate result only once
   std::vector<double> y(A.Dimensions.Rows);
   for (auto _ : state) {
-    MultiplyMatrix(A, x, y, 128*128);
+    MultiplyMatrix(A, x, y, 128 * 128);
   }
 }
 

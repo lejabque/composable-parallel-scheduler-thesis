@@ -9,12 +9,12 @@
 #include "../contrib/eigen/unsupported/Eigen/CXX11/TensorSymmetry"
 #include "../contrib/eigen/unsupported/Eigen/CXX11/ThreadPool"
 
-#if EIGEN_MODE == EIGEN_TIMESPAN || EIGEN_MODE == EIGEN_SIMPLE
-inline auto EigenPool = Eigen::ThreadPool(GetNumThreads(), true,
-                                          true); // todo: disable spinning?
-#else
+#if EIGEN_MODE == EIGEN_RAPID
 inline auto EigenPool =
     Eigen::ThreadPool(GetNumThreads() - 1); // 1 for main thread
+#else
+inline auto EigenPool = Eigen::ThreadPool(GetNumThreads(), true,
+                                          true); // todo: disable spinning?
 #endif
 
 class EigenPoolWrapper {

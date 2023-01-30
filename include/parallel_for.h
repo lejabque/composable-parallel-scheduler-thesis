@@ -54,6 +54,9 @@ inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 #elif EIGEN_MODE == EIGEN_TIMESPAN
   EigenPartitioner::ParallelForTimespan<EigenPoolWrapper>(
       from, to, std::forward<F>(func));
+#elif EIGEN_MODE == EIGEN_STATIC
+  EigenPartitioner::ParallelForStatic<EigenPoolWrapper>(from, to,
+                                                        std::forward<F>(func));
 #elif EIGEN_MODE == EIGEN_RAPID
   RapidGroup.parallel_ranges(from, to, [&func](auto from, auto to, auto part) {
     for (size_t i = from; i != to; ++i) {

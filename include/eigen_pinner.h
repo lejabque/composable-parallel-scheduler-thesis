@@ -1,7 +1,7 @@
 #pragma once
 #include "eigen_pool.h"
 
-#if EIGEN_MODE == EIGEN_SIMPLE || EIGEN_MODE == EIGEN_TIMESPAN
+#if defined(EIGEN_MODE) && EIGEN_MODE != EIGEN_RAPID
 
 struct EigenPinner {
   EigenPinner(size_t threadsNum) {
@@ -18,26 +18,16 @@ struct EigenPinner {
     };
     // use ptr because we want to wait for all threads in other threads
     auto barrier = std::make_shared<Eigen::Barrier>(threadsNum - 1);
-#if EIGEN_MODE == EIGEN_SIMPLE
-    for (size_t i = 0; i < threadsNum - 1; ++i)
-#elif EIGEN_MODE == EIGEN_TIMESPAN
-    for (size_t i = 1; i < threadsNum; ++i)
-#endif
-    {
-      EigenPool.ScheduleWithHint(
+    for (size_t i = 1; i < threadsNum; ++i) { // don't pin main thread
+      EigenPool.RunOnThread(
           [barrier, i, pinThread]() {
             pinThread(i);
             barrier->Notify();
             barrier->Wait();
           },
-          i, i + 1);
+          i);
     }
-
-#if EIGEN_MODE == EIGEN_SIMPLE
-    pinThread(threadsNum - 1);
-#elif EIGEN_MODE == EIGEN_TIMESPAN
     pinThread(0);
-#endif
     barrier->Wait();
   }
 };

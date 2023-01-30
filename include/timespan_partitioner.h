@@ -160,4 +160,29 @@ void ParallelForSimple(size_t from, size_t to, F &&func) {
   ParallelFor<Sched, false, F>(from, to, std::forward<F>(func));
 }
 
+template <typename Sched, typename F>
+void ParallelForStatic(size_t from, size_t to, F &&func) {
+  Sched sched;
+  auto blocks = GetNumThreads();
+  auto blockSize = (to - from + blocks - 1) / blocks;
+  Eigen::Barrier barrier(blocks - 1);
+  for (size_t i = 1; i < blocks; ++i) {
+    size_t start = from + blockSize * i;
+    size_t end = std::min(start + blockSize, to);
+    sched.run_on_thread(
+        [&func, &barrier, start, end]() {
+          for (size_t i = start; i < end; ++i) {
+            func(i);
+          }
+          barrier.Notify();
+        },
+        i);
+  }
+  for (size_t i = from; i < std::min(from + blockSize, to); ++i) {
+    func(i);
+  }
+  sched.join_main_thread();
+  barrier.Wait();
+}
+
 } // namespace EigenPartitioner

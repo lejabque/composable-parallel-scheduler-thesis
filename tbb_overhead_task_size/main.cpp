@@ -8,9 +8,43 @@ struct Result {
   size_t ThreadId;
 };
 
-static Timestamp GetTimestamp() {
+static Timestamp GetTimestampStart() {
 #if defined(__x86_64__)
-  return __rdtsc();
+  Timestamp t;
+  // https://github.com/google/highwayhash/blob/master/highwayhash/tsc_timer.h
+  asm volatile("lfence\n\t"
+               "rdtsc\n\t"
+               "shl $32, %%rdx\n\t"
+               "or %%rdx, %0\n\t"
+               "lfence"
+               : "=a"(t)
+               :
+               // "memory" avoids reordering. rdx = TSC >> 32.
+               // "cc" = flags modified by SHL.
+               : "rdx", "memory", "cc");
+  return t;
+#elif defined(__aarch64__)
+  Timestamp val;
+  asm volatile("mrs %0, cntvct_el0" : "=r"(val));
+  return val;
+#else
+  static_assert(false, "Unsupported architecture");
+#endif
+}
+
+static Timestamp GetTimestampEnd() {
+#if defined(__x86_64__)
+  Timestamp t;
+  asm volatile("rdtscp\n\t"
+               "shl $32, %%rdx\n\t"
+               "or %%rdx, %0\n\t"
+               "lfence"
+               : "=a"(t)
+               :
+               // "memory" avoids reordering. rcx = TSC_AUX. rdx = TSC >> 32.
+               // "cc" = flags modified by SHL.
+               : "rcx", "rdx", "memory", "cc");
+  return t;
 #elif defined(__aarch64__)
   Timestamp val;
   asm volatile("mrs %0, cntvct_el0" : "=r"(val));
@@ -36,11 +70,11 @@ void run(size_t threadNum, size_t spinCount, std::vector<Result> &results) {
       tbb::task_group_context::default_traits |
           tbb::task_group_context::concurrent_wait);
   const tbb::simple_partitioner part;
-  auto start = GetTimestamp();
+  auto start = GetTimestampStart();
   tbb::parallel_for(
       static_cast<size_t>(0), threadNum,
       [&](size_t idx) {
-        results[idx].Time = GetTimestamp() - start;
+        results[idx].Time = GetTimestampEnd() - start;
         results[idx].ThreadId = tbb::this_task_arena::current_thread_index();
         // emulating work
         for (size_t i = 0; i < spinCount; ++i) {
@@ -55,7 +89,8 @@ int main(int, char *argv[]) {
   constexpr size_t iterCount = 100;
   size_t spinCount = std::stoul(argv[1]);
 
-  std::vector<std::vector<Result>> results(iterCount, std::vector<Result>(threadNum));
+  std::vector<std::vector<Result>> results(iterCount,
+                                           std::vector<Result>(threadNum));
   run(threadNum, spinCount, results[0]); // warmup
   for (size_t i = 0; i < iterCount; ++i) {
     run(threadNum, spinCount, results[i]);

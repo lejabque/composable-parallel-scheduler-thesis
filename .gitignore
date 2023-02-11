@@ -16,6 +16,7 @@ CMakeCache.txt
 CMakeFiles/
 cmake-build*
 cmake_install.cmake
+cmake_deps/
 
 # raw benchmark results
 raw_results/

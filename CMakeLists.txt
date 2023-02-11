@@ -27,6 +27,7 @@ message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/cmake_deps)
 
 if (ENABLE_TESTS)
     # gtest
@@ -41,16 +42,6 @@ if (ENABLE_TESTS)
     endif()
 endif()
 
-# benchmark
-find_package(benchmark QUIET)
-if(NOT benchmark_FOUND)
-  FetchContent_Declare(googlebenchmark
-          GIT_REPOSITORY https://github.com/google/benchmark.git
-          GIT_TAG v1.7.0) # need master for benchmark::benchmark
-  FetchContent_MakeAvailable(
-                  googlebenchmark)
-endif()
-
 find_package(OpenMP REQUIRED)
 # todo: test that openmp is used from llvm build
 
@@ -63,9 +54,7 @@ FetchContent_Declare(
 option(TBB_TEST OFF)
 FetchContent_MakeAvailable(onetbb)
 
-
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
-
 
 # build options
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined,leak -fno-sanitize-recover=all")

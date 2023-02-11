@@ -1,3 +1,5 @@
+list(APPEND SCHEDULING_MEASURE_MODES SPIN BARRIER MULTITASK)
+
 foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
   foreach(mode IN LISTS MODES)
     if (mode STREQUAL "SERIAL")
@@ -6,6 +8,5 @@ foreach(scheduling_measure_mode IN LISTS SCHEDULING_MEASURE_MODES)
     set(target scheduling_dist_${mode}_${scheduling_measure_mode})
     add_target(${target} scheduling_dist.cpp ${mode})
     target_compile_definitions(${target} PRIVATE SCHEDULING_MEASURE_MODE=${scheduling_measure_mode})
-    target_link_libraries(${target} benchmark::benchmark)
   endforeach()
 endforeach()

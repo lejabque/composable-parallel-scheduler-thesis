@@ -27,25 +27,23 @@ print_header:
 	@echo "Bench\tRows\tColumns            \tIters\tTime\tCPU\tUnit"
 	@echo ----------------------------------------------------------------------------
 
-bench_spmv_balanced: print_header
-	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_spmv_balanced* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/spmv_balanced/$$x.json; done
+bench_spmv: print_header
+	mkdir -p raw_results/spmv
+	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_spmv* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/spmv/$$x.json; done
 
-bench_spmv_unbalanced:
-	print_header
-	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_spmv_unbalanced* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/spmv_unbalanced/$$x.json; done
-
-bench_reduce:
-	print_header
+bench_reduce: print_header
+	mkdir -p raw_results/reduce
 	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_reduce_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/reduce/$$x.json; done
 
-bench_scan:
-	print_header
+bench_scan: print_header
+	mkdir -p raw_results/scan
 	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_scan_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/scan/$$x.json; done
 
 run_scheduling_dist:
-	@for x in $(shell ls -1 cmake-build-release/scheduling_dist/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/scheduling_dist/$$x > raw_results/scheduling_distt/$$x.json; done
+	mkdir -p raw_results/scheduling_dist
+	@for x in $(shell ls -1 cmake-build-release/scheduling_dist/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/scheduling_dist/$$x > raw_results/scheduling_dist/$$x.json; done
 
-bench: clean_bench bench_dir clean release bench_spmv_balanced bench_spmv_unbalanced bench_reduce bench_scan run_scheduling_dist
+bench: clean_bench bench_dir clean release bench_spmv bench_reduce bench_scan run_scheduling_dist
 
 bench_tests:
 	@for x in $(shell ls -1 cmake-build-debug/benchmarks/tests/*tests* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-debug/benchmarks/tests/$$x; done

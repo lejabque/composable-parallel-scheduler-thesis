@@ -134,10 +134,6 @@ void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
 #pragma omp for nowait schedule(monotonic : guided)
 #elif OMP_MODE == OMP_GUIDED_NONMONOTONIC
 #pragma omp for nowait schedule(nonmonotonic : guided)
-#elif OMP_MODE == OMP_RUNTIME_MONOTONIC
-#pragma omp for nowait schedule(monotonic : runtime)
-#elif OMP_MODE == OMP_RUNTIME_NONMONOTONIC
-#pragma omp for nowait schedule(nonmonotonic : runtime)
 #else
   static_assert(false, "Wrong OMP_MODE mode");
 #endif

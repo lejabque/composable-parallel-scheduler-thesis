@@ -55,8 +55,6 @@ find_package(OpenMP REQUIRED)
 # todo: test that openmp is used from llvm build
 
 # link with TBB
-find_package(TBB QUIET)
-if(NOT TBB_FOUND)
   FetchContent_Declare(
     onetbb
     GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
@@ -64,7 +62,6 @@ if(NOT TBB_FOUND)
   )
   option(TBB_TEST OFF)
   FetchContent_MakeAvailable(onetbb)
-endif()
 
 
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -save-temps=obj")
@@ -77,8 +74,7 @@ option(USE_SANITIZERS "Enable to build with undefined,leak and address sanitizer
 # benchmarks:
 list(APPEND OMP_MODES OMP_STATIC
   OMP_DYNAMIC_MONOTONIC OMP_DYNAMIC_NONMONOTONIC
-  OMP_GUIDED_MONOTONIC OMP_GUIDED_NONMONOTONIC
-  OMP_RUNTIME_MONOTONIC OMP_RUNTIME_NONMONOTONIC)
+  OMP_GUIDED_MONOTONIC OMP_GUIDED_NONMONOTONIC)
 list(APPEND TBB_MODES TBB_SIMPLE TBB_AUTO TBB_AFFINITY TBB_CONST_AFFINITY)
 if($ENV{ENABLE_RAPID})
   list(APPEND TBB_MODES TBB_RAPID)

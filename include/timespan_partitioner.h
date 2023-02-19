@@ -9,12 +9,16 @@
 
 namespace EigenPartitioner {
 
+struct Range {
+  size_t From;
+  size_t To;
+
+  size_t Size() { return To - From; }
+};
+
 struct SplitData {
   static constexpr size_t K_SPLIT = 2; // todo: tune K and fix code
-  size_t ThreadId;
-  size_t Height;   // height of part in tree where each layer is divided by
-                   // K_SPLIT parts
-  size_t PartSize; // threads to execute this part
+  Range Threads;
   size_t GrainSize = 1;
 };
 
@@ -44,46 +48,37 @@ struct Task {
 
   void operator()() {
     if constexpr (Initial) {
-      if (Split_.PartSize != 1 && IsDivisible()) {
-        // take 1/PartSize of iterations for this thread
-        size_t splitFrom =
-            Start_ + (End_ - Start_ + Split_.PartSize - 1) / Split_.PartSize;
-        size_t splitTo = End_;
-        if (splitFrom < splitTo) {
-          End_ = splitFrom;
-          // divide to K_SPLIT (actually 2) parts but proportionally to number
-          // of threads in each part
-          size_t step =
-              (splitTo - splitFrom + Split_.K_SPLIT - 1) / Split_.K_SPLIT;
-          // todo: can we simplify this?
-          size_t leftThreads =
-              std::min(static_cast<size_t>((1 << (Split_.Height - 1)) - 1),
-                       Split_.PartSize - (1 << (Split_.Height - 2)));
-          size_t rightThreads = Split_.PartSize - leftThreads - 1;
-          // split proportionally to threads in each part
-          size_t split = splitFrom + (splitTo - splitFrom) * leftThreads /
-                                         (Split_.PartSize - 1);
-          if (splitFrom < split) { // TODO: do we need this check?
+      if (Split_.Threads.Size() != 1 && IsDivisible()) {
+        // take 1/parts of iterations for current thread
+        Range otherData{Start_ + (End_ - Start_ + Split_.Threads.Size() - 1) /
+                                     Split_.Threads.Size(),
+                        End_};
+        if (otherData.From < otherData.To) {
+          End_ = otherData.From;
+          // divide otherData range to K_SPLIT (actually 2) parts
+          Range otherThreads{Split_.Threads.From + 1, Split_.Threads.To};
+          auto splitThread =
+              otherThreads.From + (otherThreads.To - otherThreads.From) / 2;
+          size_t split = otherData.From +
+                         otherData.Size() * (splitThread - otherThreads.From) /
+                             otherThreads.Size();
+          if (otherData.From < split) { // TODO: do we need this check?
+            Range threads{otherThreads.From, splitThread};
             Sched_.run_on_thread(
                 Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_,
-                    splitFrom,
-                    split,
-                    Func_,
-                    {2 * Split_.ThreadId + 1, GetLog2(leftThreads) + 1,
-                     leftThreads, Split_.GrainSize}},
-                2 * Split_.ThreadId + 1);
+                    Sched_, otherData.From, split, Func_,
+                    SplitData{.Threads = threads,
+                              .GrainSize = Split_.GrainSize}},
+                threads.From);
           }
-          if (split < splitTo) {
+          if (split < otherData.To) {
+            Range threads{splitThread, otherThreads.To};
             Sched_.run_on_thread(
                 Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_,
-                    split,
-                    splitTo,
-                    Func_,
-                    {2 * Split_.ThreadId + 2, GetLog2(rightThreads) + 1,
-                     rightThreads, Split_.GrainSize}},
-                2 * Split_.ThreadId + 2);
+                    Sched_, split, otherData.To, Func_,
+                    SplitData{.Threads = threads,
+                              .GrainSize = Split_.GrainSize}},
+                threads.From);
           }
         }
       }
@@ -136,7 +131,7 @@ auto MakeInitialTask(Sched &sched, size_t from, size_t to, F &&func,
                      size_t threadCount, size_t grainSize = 1) {
   return Task<Sched, F, UseTimespan, true>{
       sched, from, to, std::forward<F>(func),
-      SplitData{0, GetLog2(threadCount) + 1, threadCount, grainSize}};
+      SplitData{.Threads = {0, threadCount}, .GrainSize = grainSize}};
 }
 
 template <typename Sched, bool UseTimespan, typename F>

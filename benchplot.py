@@ -136,9 +136,6 @@ def plot_scheduling_dist(scheduling_dist, verbose):
         ax = fig.add_subplot(gs[iter, 0])
         if iter == 0:
             ax.set_title("Distribution of tasks to threads")
-        ax.set_ylabel("Thread")
-        ax.set_xlabel("Task")
-        ax.xaxis.set_label_position('top')
         # ax.get_figure().tight_layout()
 
         thread_count = len(scheduling_dist[iter])
@@ -151,7 +148,15 @@ def plot_scheduling_dist(scheduling_dist, verbose):
                 # data[idx, t["index"]] = 0
                 # fill rectangle by zeros
                 data[idx * task_height: (idx + 1) * task_height, t["index"]] = 0
+        ax.set_ylabel("Thread")
+        ax.set_xlabel("Task")
+        ax.xaxis.set_label_position('top')
         ax.imshow(data, cmap='gray', origin='lower')
+
+        def format_task(x, _):
+            return str(int(x / task_height))
+
+        ax.yaxis.set_major_formatter(format_task)
 
     # plot heatmap thread id, cpu id
     for iter in range(row_count):

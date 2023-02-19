@@ -26,6 +26,8 @@ struct ScheduledTask {
     Id = GetThreadIndex();
     SchedCpu = sched_getcpu();
   }
+
+  bool operator<(const ScheduledTask &other) { return TaskIdx < other.TaskIdx; }
 };
 } // namespace
 
@@ -104,6 +106,7 @@ PrintResults(size_t threadNum,
     size_t total = 0;
     for (auto &&[id, tasks] : resultPerThread) {
       std::cout << "    \"" << id << "\": [";
+      std::sort(tasks.begin(), tasks.end());
       for (size_t i = 0; i != tasks.size(); ++i) {
         auto task = tasks[i];
         std::cout << "{\"index\": " << task.TaskIdx

@@ -92,12 +92,16 @@ struct Task {
       // at first we are executing job for INIT_TIME
       // and then create balancing task
       auto start = Now();
+      auto prevNowCall = Start_;
       while (Start_ < End_) {
         Func_(Start_);
         ++Start_;
-        if (Now() - start > INIT_TIME) {
-          // TODO: call Now() less often?
-          break;
+        if (Start_ - prevNowCall > 128) {
+          if (Now() - start > INIT_TIME) {
+            // TODO: call Now() less often?
+            break;
+          }
+          prevNowCall = Start_;
         }
       }
     }

@@ -3,6 +3,7 @@
 #include "num_threads.h"
 #include "util.h"
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <utility>
@@ -17,10 +18,14 @@ struct Range {
 };
 
 struct SplitData {
-  static constexpr size_t K_SPLIT = 2; // todo: tune K and fix code
+  static constexpr size_t K_SPLIT = 2; // todo: tune K
   Range Threads;
   size_t GrainSize = 1;
 };
+
+inline size_t CalcStep(size_t from, size_t to, size_t chunksCount) {
+  return (to - from + chunksCount - 1) / chunksCount;
+}
 
 inline uint32_t GetLog2(uint32_t value) {
   static constexpr auto table =
@@ -57,29 +62,47 @@ struct Task {
           End_ = otherData.From;
           // divide otherData range to K_SPLIT (actually 2) parts
           Range otherThreads{Split_.Threads.From + 1, Split_.Threads.To};
-          auto splitThread =
-              otherThreads.From + (otherThreads.To - otherThreads.From) / 2;
-          size_t split = otherData.From +
-                         otherData.Size() * (splitThread - otherThreads.From) /
-                             otherThreads.Size();
-          if (otherData.From < split) { // TODO: do we need this check?
-            Range threads{otherThreads.From, splitThread};
+          size_t parts = std::min(std::min(Split_.K_SPLIT, otherThreads.Size()),
+                                  otherData.Size());
+          // std::cerr << "Splitting data [" + std::to_string(otherData.From) +
+          //                  ";" + std::to_string(otherData.To) +
+          //                  ") on threads [" +
+          //                  std::to_string(otherThreads.From) + ";" +
+          //                  std::to_string(otherThreads.To) +
+          //                  ") parts: " + std::to_string(parts) + " \n";
+          auto threadsSize = otherThreads.Size();
+          auto threadStep = threadsSize / parts;
+          auto increareThreadStepFor = threadsSize % parts;
+          auto dataSize = otherData.Size(); // TODO: unify code with threads
+          auto dataStep = dataSize / parts;
+          auto increaseDataStepFor = dataSize % parts;
+          for (size_t i = 0; i != parts; ++i) {
+            auto threadSplit =
+                std::min(otherThreads.To, otherThreads.From + threadStep +
+                                              (i < increareThreadStepFor));
+            auto dataSplit =
+                std::min(otherData.To,
+                         otherData.From + dataStep + (i < increaseDataStepFor));
+            // std::cerr << "Scheduling range [" + std::to_string(dataFrom) +
+            // ";" +
+            //                  std::to_string(dataTo) + ") on threads [" +
+            //                  std::to_string(threadFrom) + ";" +
+            //                  std::to_string(threadTo) + ") \n";
+            assert(otherData.From < dataSplit);
+            assert(otherThreads.From < threadSplit);
             Sched_.run_on_thread(
                 Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_, otherData.From, split, Func_,
-                    SplitData{.Threads = threads,
+                    Sched_, otherData.From, dataSplit, Func_,
+                    SplitData{.Threads = {otherThreads.From, threadSplit},
                               .GrainSize = Split_.GrainSize}},
-                threads.From);
+                otherThreads.From);
+            otherThreads.From = threadSplit;
+            otherData.From = dataSplit;
           }
-          if (split < otherData.To) {
-            Range threads{splitThread, otherThreads.To};
-            Sched_.run_on_thread(
-                Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_, split, otherData.To, Func_,
-                    SplitData{.Threads = threads,
-                              .GrainSize = Split_.GrainSize}},
-                threads.From);
-          }
+          assert(otherData.From == otherData.To);
+          assert(otherThreads.From == otherThreads.To ||
+                 parts < K_SPLIT &&
+                     otherThreads.From + (K_SPLIT - parts) == otherThreads.To);
         }
       }
     }
@@ -91,9 +114,8 @@ struct Task {
       while (Start_ < End_) {
         Func_(Start_);
         ++Start_;
-        if (Start_ - prevNowCall > 128) {
+        if (Start_ - prevNowCall > 128) { // todo: tune this const?
           if (Now() - start > INIT_TIME) {
-            // TODO: call Now() less often?
             break;
           }
           prevNowCall = Start_;
@@ -104,11 +126,10 @@ struct Task {
     // make balancing tasks for remaining iterations
     if (Initial && IsDivisible()) {
       // TODO: maybe we need to check "depth" - number of being stolen times?
-      // TODO: divide not by 2, maybe proportionally or other way
+      // TODO: divide not by 2, maybe proportionally or other way?
       size_t mid = (Start_ + End_) / 2;
-      // TODO: by default Eigen's Schedule push task to the current queue, maybe
-      // better to push it into other thread's queue?
-      // (work-stealing vs mail-boxing)
+      // eigen's scheduler will push task to the current thread queue,
+      // then some other thread can steal this
       Sched_.run(Task<Scheduler, Func, false>{
           Sched_, mid, End_, Func_, SplitData{.GrainSize = Split_.GrainSize}});
       End_ = mid;

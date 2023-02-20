@@ -1,0 +1,96 @@
+{
+  "context": {
+    "date": "2023-02-21T01:14:46+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_OMP_DYNAMIC_MONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [22.36,11.82,4.88],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_OMP_DYNAMIC_MONOTONIC/1024/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_OMP_DYNAMIC_MONOTONIC/1024/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 9830,
+      "real_time": 7.1474358094581390e+01,
+      "cpu_time": 7.1456820956256365e+01,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_OMP_DYNAMIC_MONOTONIC/48/1048576/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_OMP_DYNAMIC_MONOTONIC/48/1048576/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 245,
+      "real_time": 2.8513364493846893e+03,
+      "cpu_time": 2.8512373469387762e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_OMP_DYNAMIC_MONOTONIC/8192/8192/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_OMP_DYNAMIC_MONOTONIC/8192/8192/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 183,
+      "real_time": 3.8239772691101325e+03,
+      "cpu_time": 3.8231814754098359e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_OMP_DYNAMIC_MONOTONIC/65536/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_OMP_DYNAMIC_MONOTONIC/65536/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 170,
+      "real_time": 4.1161437655853879e+03,
+      "cpu_time": 4.1159694117647068e+03,
+      "time_unit": "us"
+    }
+  ]
+}

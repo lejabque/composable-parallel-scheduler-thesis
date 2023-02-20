@@ -1,0 +1,96 @@
+{
+  "context": {
+    "date": "2023-02-21T01:15:19+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_TBB_SIMPLE",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [32.46,15.28,6.26],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_TBB_SIMPLE/1024/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_TBB_SIMPLE/1024/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5724,
+      "real_time": 1.2135296991025960e+02,
+      "cpu_time": 1.2134790880503145e+02,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_SIMPLE/48/1048576/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_TBB_SIMPLE/48/1048576/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 238,
+      "real_time": 2.9274217643532434e+03,
+      "cpu_time": 2.9271915546218497e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_SIMPLE/8192/8192/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_TBB_SIMPLE/8192/8192/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 180,
+      "real_time": 3.8990282789907524e+03,
+      "cpu_time": 3.8985529444444433e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_SIMPLE/65536/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_TBB_SIMPLE/65536/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 173,
+      "real_time": 4.0431834671194156e+03,
+      "cpu_time": 4.0425671676300562e+03,
+      "time_unit": "us"
+    }
+  ]
+}

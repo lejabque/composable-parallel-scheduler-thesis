@@ -1,0 +1,96 @@
+{
+  "context": {
+    "date": "2023-02-21T01:15:15+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_TBB_CONST_AFFINITY",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [32.46,15.28,6.26],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_TBB_CONST_AFFINITY/1024/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_TBB_CONST_AFFINITY/1024/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5462,
+      "real_time": 1.2641605093777835e+02,
+      "cpu_time": 1.2639995056755770e+02,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_CONST_AFFINITY/48/1048576/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_TBB_CONST_AFFINITY/48/1048576/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 239,
+      "real_time": 2.9277465692000410e+03,
+      "cpu_time": 2.9276738912133901e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_CONST_AFFINITY/8192/8192/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_TBB_CONST_AFFINITY/8192/8192/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 181,
+      "real_time": 3.8734606096716548e+03,
+      "cpu_time": 3.8733366850828734e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_TBB_CONST_AFFINITY/65536/1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_TBB_CONST_AFFINITY/65536/1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 183,
+      "real_time": 3.8280321305485372e+03,
+      "cpu_time": 3.8275439890710368e+03,
+      "time_unit": "us"
+    }
+  ]
+}

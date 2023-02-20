@@ -1,0 +1,54 @@
+{
+  "context": {
+    "date": "2023-02-21T01:12:33+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spmv_hyperbolic_EIGEN_SIMPLE",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [13.77,5.84,2.17],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "SpmvHyperbolic_EIGEN_SIMPLE/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "SpmvHyperbolic_EIGEN_SIMPLE/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 285,
+      "real_time": 2.4679814383648991e+03,
+      "cpu_time": 2.4679880701754382e+03,
+      "time_unit": "us"
+    }
+  ]
+}

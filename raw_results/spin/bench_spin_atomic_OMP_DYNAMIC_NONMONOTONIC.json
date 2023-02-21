@@ -1,0 +1,96 @@
+{
+  "context": {
+    "date": "2023-02-21T13:21:18+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_atomic_OMP_DYNAMIC_NONMONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [23.4,12.21,5.03],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:1024/iters:1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:1024/iters:1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5145,
+      "real_time": 1.3905993976835722e+02,
+      "cpu_time": 1.3904539941690965e+02,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:48/iters:1048576/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:48/iters:1048576/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 800,
+      "real_time": 8.7776843749452382e+02,
+      "cpu_time": 8.7765802500000007e+02,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:8192/iters:8192/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:8192/iters:8192/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 609,
+      "real_time": 1.1496252054577978e+03,
+      "cpu_time": 1.1493612807881773e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:65536/iters:1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_NONMONOTONIC/tasks:65536/iters:1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 550,
+      "real_time": 1.2654325823214922e+03,
+      "cpu_time": 1.2653315454545457e+03,
+      "time_unit": "us"
+    }
+  ]
+}

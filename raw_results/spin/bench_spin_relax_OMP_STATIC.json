@@ -1,0 +1,96 @@
+{
+  "context": {
+    "date": "2023-02-21T13:22:50+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_relax_OMP_STATIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [40.74,20.84,8.76],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_OMP_STATIC/tasks:1024/iters:1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_OMP_STATIC/tasks:1024/iters:1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 34329,
+      "real_time": 2.0491208306757702e+01,
+      "cpu_time": 2.0486840572111042e+01,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_STATIC/tasks:48/iters:1048576/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_OMP_STATIC/tasks:48/iters:1048576/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 859,
+      "real_time": 8.1233072178102202e+02,
+      "cpu_time": 8.1205926658905696e+02,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_STATIC/tasks:8192/iters:8192/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_OMP_STATIC/tasks:8192/iters:8192/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 646,
+      "real_time": 1.0847912534736904e+03,
+      "cpu_time": 1.0847258978328175e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_STATIC/tasks:65536/iters:1024/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_OMP_STATIC/tasks:65536/iters:1024/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 640,
+      "real_time": 1.0924228437943384e+03,
+      "cpu_time": 1.0922936718749997e+03,
+      "time_unit": "us"
+    }
+  ]
+}

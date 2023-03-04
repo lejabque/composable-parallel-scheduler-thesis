@@ -65,12 +65,19 @@ static std::vector<ScheduledTask> RunWithSpin(size_t threadNum,
   uint64_t spinPerIter = 100'000'000 / tasksPerThread;
   auto tasksCount = threadNum * tasksPerThread;
   std::vector<ScheduledTask> results(tasksCount);
+  std::atomic<size_t> reported(0);
   auto start = Now();
   ParallelFor(0, tasksCount, [&](size_t i) {
     results[i] = ScheduledTask(i, start);
     // emulating work
     for (size_t i = 0; i < spinPerIter; ++i) {
       CpuRelax();
+    }
+    if (tasksPerThread == 1) {
+      reported.fetch_add(1, std::memory_order_relaxed);
+      while (reported.load(std::memory_order_relaxed) != threadNum) {
+        CpuRelax();
+      }
     }
     results[i].Trace.ExecutionEnd = Now();
   });
@@ -128,10 +135,13 @@ PrintResults(size_t threadNum,
       for (size_t i = 0; i != tasks.size(); ++i) {
         auto task = tasks[i];
         std::cout << "{\"index\": " << task.TaskIdx
-                  << ", \"trace\": {\"start\": " << task.Trace.Start
-                  << ", \"execution_start\": " << task.Trace.ExecutionStart
-                  << ", \"execution_end\": " << task.Trace.ExecutionEnd
-                  << ", \"end\": " << task.Trace.End
+                  << ", \"trace\": {\"start_timestamp\": " << task.Trace.Start
+                  << ", \"scheduling_stage\": "
+                  << task.Trace.ExecutionStart - task.Trace.Start
+                  << ", \"execution_stage\": "
+                  << task.Trace.ExecutionEnd - task.Trace.ExecutionStart
+                  << ", \"end_stage\": "
+                  << task.Trace.End - task.Trace.ExecutionEnd
                   << "}, \"cpu\": " << task.SchedCpu << "}"
                   << (i == tasks.size() - 1 ? "" : ", ");
       }

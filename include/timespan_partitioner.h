@@ -1,8 +1,10 @@
 #pragma once
 #include "../contrib/eigen/unsupported/Eigen/CXX11/ThreadPool"
 #include "num_threads.h"
+#include "poor_barrier.h"
 #include "util.h"
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -43,11 +45,13 @@ inline uint32_t GetLog2(uint32_t value) {
 template <typename Scheduler, typename Func, bool DelayBalance,
           bool Initial = false>
 struct Task {
-  static constexpr uint64_t INIT_TIME = 100000; // todo: tune time
+  static constexpr uint64_t INIT_TIME =
+      1000000; // todo: tune time for platforms
 
-  Task(Scheduler &sched, size_t from, size_t to, Func func, SplitData split)
-      : Sched_(sched), Start_(from), End_(to), Func_(std::move(func)),
-        Split_(split) {}
+  Task(Scheduler &sched, SpinBarrier &barrier, size_t from, size_t to,
+       Func func, SplitData split)
+      : Sched_(sched), Barrier_(barrier), Start_(from), End_(to),
+        Func_(std::move(func)), Split_(split) {}
 
   bool IsDivisible() const { return Start_ + Split_.GrainSize < End_; }
 
@@ -69,6 +73,7 @@ struct Task {
           auto dataSize = otherData.Size(); // TODO: unify code with threads
           auto dataStep = dataSize / parts;
           auto increaseDataStepFor = dataSize % parts;
+          Barrier_.Add(parts);
           for (size_t i = 0; i != parts; ++i) {
             auto threadSplit =
                 std::min(otherThreads.To, otherThreads.From + threadStep +
@@ -80,7 +85,7 @@ struct Task {
             assert(otherThreads.From < threadSplit);
             Sched_.run_on_thread(
                 Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_, otherData.From, dataSplit, Func_,
+                    Sched_, Barrier_, otherData.From, dataSplit, Func_,
                     SplitData{.Threads = {otherThreads.From, threadSplit},
                               .GrainSize = Split_.GrainSize}},
                 otherThreads.From);
@@ -119,17 +124,22 @@ struct Task {
       size_t mid = (Start_ + End_) / 2;
       // eigen's scheduler will push task to the current thread queue,
       // then some other thread can steal this
+      Barrier_.Add(1);
       Sched_.run(Task<Scheduler, Func, false>{
-          Sched_, mid, End_, Func_, SplitData{.GrainSize = Split_.GrainSize}});
+          Sched_, Barrier_, mid, End_, Func_,
+          SplitData{.GrainSize = Split_.GrainSize}});
       End_ = mid;
     }
     for (; Start_ < End_; ++Start_) {
       Func_(Start_);
     }
+
+    Barrier_.Notify();
   }
 
 private:
   Scheduler &Sched_;
+  SpinBarrier &Barrier_;
   size_t Start_;
   size_t End_;
   Func Func_;
@@ -137,38 +147,36 @@ private:
 };
 
 template <typename Sched, bool UseTimespan, typename F>
-auto MakeInitialTask(Sched &sched, size_t from, size_t to, F &&func,
-                     size_t threadCount, size_t grainSize = 1) {
+auto MakeInitialTask(Sched &sched, SpinBarrier &barrier, size_t from, size_t to,
+                     F func, size_t threadCount, size_t grainSize = 1) {
   return Task<Sched, F, UseTimespan, true>{
-      sched, from, to, std::forward<F>(func),
+      sched,
+      barrier,
+      from,
+      to,
+      std::move(func),
       SplitData{.Threads = {0, threadCount}, .GrainSize = grainSize}};
 }
 
 template <typename Sched, bool UseTimespan, typename F>
-void ParallelFor(size_t from, size_t to, F &&func, size_t grainSize = 1) {
+void ParallelFor(size_t from, size_t to, F func, size_t grainSize = 1) {
   Sched sched;
-  Eigen::Barrier barrier(to - from);
+  SpinBarrier barrier(1);
   auto task = MakeInitialTask<Sched, UseTimespan>(
-      sched, from, to,
-      [&func, &barrier](size_t i) {
-        func(i);
-        barrier.Notify();
-      },
-      GetNumThreads());
+      sched, barrier, from, to, std::move(func), GetNumThreads());
   task();
   sched.join_main_thread();
   barrier.Wait();
 }
 
 template <typename Sched, typename F>
-void ParallelForTimespan(size_t from, size_t to, F &&func,
-                         size_t grainSize = 1) {
-  ParallelFor<Sched, true, F>(from, to, std::forward<F>(func), grainSize);
+void ParallelForTimespan(size_t from, size_t to, F func, size_t grainSize = 1) {
+  ParallelFor<Sched, true, F>(from, to, std::move(func), grainSize);
 }
 
 template <typename Sched, typename F>
-void ParallelForSimple(size_t from, size_t to, F &&func, size_t grainSize = 1) {
-  ParallelFor<Sched, false, F>(from, to, std::forward<F>(func), grainSize);
+void ParallelForSimple(size_t from, size_t to, F func, size_t grainSize = 1) {
+  ParallelFor<Sched, false, F>(from, to, std::move(func), grainSize);
 }
 
 template <typename Sched, typename F>
@@ -176,7 +184,7 @@ void ParallelForStatic(size_t from, size_t to, F &&func) {
   Sched sched;
   auto blocks = GetNumThreads();
   auto blockSize = (to - from + blocks - 1) / blocks;
-  Eigen::Barrier barrier(blocks - 1);
+  SpinBarrier barrier(blocks - 1);
   for (size_t i = 1; i < blocks; ++i) {
     size_t start = from + blockSize * i;
     size_t end = std::min(start + blockSize, to);

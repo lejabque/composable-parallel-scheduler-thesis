@@ -2,6 +2,7 @@
 
 #include "eigen_pool.h"
 #include "modes.h"
+#include "poor_barrier.h"
 #include "timespan_partitioner.h"
 #include "util.h"
 #include <algorithm>
@@ -129,7 +130,7 @@ void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
 }
 
 inline void Warmup(size_t threadsNum) {
-  Eigen::Barrier barrier(threadsNum);
+  SpinBarrier barrier(threadsNum);
   ParallelFor(0, threadsNum, [&barrier](size_t) {
     barrier.Notify();
     barrier.Wait(); // wait for all threads to start

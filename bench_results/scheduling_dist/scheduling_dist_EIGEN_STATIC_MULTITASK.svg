@@ -5505,6 +5505,8 @@ z
       <!-- 0 -->
       <g transform="translate(426.542279 968.050607) scale(0.1 -0.1)">
        <use xlink:href="#DejaVuSans-30"/>
+       <use xlink:href="#DejaVuSans-2e" x="63.623047"/>
+       <use xlink:href="#DejaVuSans-35" x="95.410156"/>
       </g>
      </g>
     </g>
@@ -5602,7 +5604,7 @@ z
     </g>
     <g id="text_251">
      <!-- Clock ticks -->
-     <g transform="translate(420.462592 939.707468) rotate(-90) scale(0.1 -0.1)">
+     <g transform="translate(410.921967 939.707468) rotate(-90) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-43"/>
       <use xlink:href="#DejaVuSans-6c" x="69.824219"/>
       <use xlink:href="#DejaVuSans-6f" x="97.607422"/>

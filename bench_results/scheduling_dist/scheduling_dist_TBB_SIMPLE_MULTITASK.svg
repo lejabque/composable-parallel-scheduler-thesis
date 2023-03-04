@@ -4173,6 +4173,8 @@ z
       <!-- 0 -->
       <g transform="translate(426.542279 427.465848) scale(0.1 -0.1)">
        <use xlink:href="#DejaVuSans-30"/>
+       <use xlink:href="#DejaVuSans-2e" x="63.623047"/>
+       <use xlink:href="#DejaVuSans-30" x="95.410156"/>
       </g>
      </g>
     </g>
@@ -4225,7 +4227,7 @@ z
     </g>
     <g id="text_191">
      <!-- Clock ticks -->
-     <g transform="translate(420.462592 398.462722) rotate(-90) scale(0.1 -0.1)">
+     <g transform="translate(410.921967 398.462722) rotate(-90) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-43"/>
       <use xlink:href="#DejaVuSans-6c" x="69.824219"/>
       <use xlink:href="#DejaVuSans-6f" x="97.607422"/>
@@ -5256,6 +5258,8 @@ z
       <!-- 0 -->
       <g transform="translate(426.542279 832.805663) scale(0.1 -0.1)">
        <use xlink:href="#DejaVuSans-30"/>
+       <use xlink:href="#DejaVuSans-2e" x="63.623047"/>
+       <use xlink:href="#DejaVuSans-30" x="95.410156"/>
       </g>
      </g>
     </g>
@@ -5300,7 +5304,7 @@ z
     </g>
     <g id="text_239">
      <!-- Clock ticks -->
-     <g transform="translate(420.462592 804.396282) rotate(-90) scale(0.1 -0.1)">
+     <g transform="translate(410.921967 804.396282) rotate(-90) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-43"/>
       <use xlink:href="#DejaVuSans-6c" x="69.824219"/>
       <use xlink:href="#DejaVuSans-6f" x="97.607422"/>
@@ -5661,7 +5665,7 @@ z
      <g transform="translate(439.904779 853.555932) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-31"/>
       <use xlink:href="#DejaVuSans-65" x="63.623047"/>
-      <use xlink:href="#DejaVuSans-37" x="125.146484"/>
+      <use xlink:href="#DejaVuSans-36" x="125.146484"/>
      </g>
     </g>
    </g>
@@ -6282,6 +6286,8 @@ z
       <!-- 0 -->
       <g transform="translate(426.542279 1238.73437) scale(0.1 -0.1)">
        <use xlink:href="#DejaVuSans-30"/>
+       <use xlink:href="#DejaVuSans-2e" x="63.623047"/>
+       <use xlink:href="#DejaVuSans-30" x="95.410156"/>
       </g>
      </g>
     </g>
@@ -6326,7 +6332,7 @@ z
     </g>
     <g id="text_287">
      <!-- Clock ticks -->
-     <g transform="translate(420.462592 1210.329841) rotate(-90) scale(0.1 -0.1)">
+     <g transform="translate(410.921967 1210.329841) rotate(-90) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-43"/>
       <use xlink:href="#DejaVuSans-6c" x="69.824219"/>
       <use xlink:href="#DejaVuSans-6f" x="97.607422"/>
@@ -6966,6 +6972,9 @@ z
       <!-- 0 -->
       <g transform="translate(426.542279 1509.343926) scale(0.1 -0.1)">
        <use xlink:href="#DejaVuSans-30"/>
+       <use xlink:href="#DejaVuSans-2e" x="63.623047"/>
+       <use xlink:href="#DejaVuSans-30" x="95.410156"/>
+       <use xlink:href="#DejaVuSans-30" x="159.033203"/>
       </g>
      </g>
     </g>
@@ -7010,7 +7019,7 @@ z
     </g>
     <g id="text_319">
      <!-- Clock ticks -->
-     <g transform="translate(420.462592 1480.952214) rotate(-90) scale(0.1 -0.1)">
+     <g transform="translate(404.559467 1480.952214) rotate(-90) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-43"/>
       <use xlink:href="#DejaVuSans-6c" x="69.824219"/>
       <use xlink:href="#DejaVuSans-6f" x="97.607422"/>

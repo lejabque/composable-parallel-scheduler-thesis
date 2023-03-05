@@ -28,12 +28,6 @@ foreach(payload IN LISTS SPIN_PAYLOADS)
     endforeach()
 endforeach()
 
-foreach(mode IN LISTS MODES)
-    set(target bench_noop_${mode})
-    add_target(${target} bench_noop.cpp ${mode})
-    target_link_libraries(${target} benchmark::benchmark)
-endforeach()
-
 if (ENABLE_TESTS)
     add_subdirectory(tests)
 endif()

@@ -8,10 +8,8 @@
 struct SpinBarrier {
   SpinBarrier(size_t count) : remain_(count) {}
 
-  void Notify() { remain_.fetch_sub(1, std::memory_order_relaxed); }
-
-  void Add(size_t count) {
-    remain_.fetch_add(count, std::memory_order_relaxed);
+  void Notify(size_t count = 1) {
+    remain_.fetch_sub(count, std::memory_order_relaxed);
   }
 
   void Wait() {

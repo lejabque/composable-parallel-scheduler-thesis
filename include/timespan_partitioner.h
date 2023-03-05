@@ -23,24 +23,35 @@ struct SplitData {
   static constexpr size_t K_SPLIT = 2; // todo: tune K
   Range Threads;
   size_t GrainSize = 1;
+  size_t Depth = 0;
 };
 
-inline size_t CalcStep(size_t from, size_t to, size_t chunksCount) {
-  return (to - from + chunksCount - 1) / chunksCount;
-}
+struct TaskNode {
+  using NodePtr = std::shared_ptr<TaskNode>; // todo: intrusive ptr?
 
-inline uint32_t GetLog2(uint32_t value) {
-  static constexpr auto table =
-      std::array{0, 9,  1,  10, 13, 21, 2,  29, 11, 14, 16, 18, 22, 25, 3, 30,
-                 8, 12, 20, 28, 15, 17, 24, 7,  19, 27, 23, 6,  26, 5,  4, 31};
+  TaskNode(NodePtr parent) : Parent(parent) {}
 
-  value |= value >> 1;
-  value |= value >> 2;
-  value |= value >> 4;
-  value |= value >> 8;
-  value |= value >> 16;
-  return table[(((value * 0x7c4acdd) >> 27) % 32)];
-}
+  void SpawnChild(size_t count = 1) {
+    ChildWaitingSteal_.fetch_add(count, std::memory_order_relaxed);
+  }
+
+  void OnStolen() {
+    Parent->ChildWaitingSteal_.fetch_sub(1, std::memory_order_relaxed);
+  }
+
+  bool AllStolen() {
+    return !ChildWaitingSteal_.load(std::memory_order_relaxed);
+  }
+
+  static NodePtr MakeChildNode(NodePtr &parent) {
+    parent->SpawnChild();
+    return std::make_shared<TaskNode>(parent);
+  }
+
+  NodePtr Parent;
+
+  std::atomic<size_t> ChildWaitingSteal_{0};
+};
 
 template <typename Scheduler, typename Func, bool DelayBalance,
           bool Initial = false>
@@ -48,66 +59,64 @@ struct Task {
   static constexpr uint64_t INIT_TIME = 100000; // todo: tune time for platforms
   using StolenFlag = std::atomic<bool>;
 
-  Task(Scheduler &sched, SpinBarrier &barrier, size_t from, size_t to,
+  Task(Scheduler &sched, TaskNode::NodePtr &parent, size_t from, size_t to,
        Func func, SplitData split)
-      : Sched_(sched), Barrier_(barrier), Current_(from), End_(to),
-        Func_(std::move(func)), Split_(split) {}
-
-  Task(Scheduler &sched, SpinBarrier &barrier, size_t from, size_t to,
-       Func func, SplitData split, std::shared_ptr<StolenFlag> stolen)
-      : Sched_(sched), Barrier_(barrier), Current_(from), End_(to),
-        Func_(std::move(func)), Split_(split), Stolen_(stolen) {}
+      : Sched_(sched), CurrentNode_(TaskNode::MakeChildNode(parent)),
+        Current_(from), End_(to), Func_(std::move(func)), Split_(split) {}
 
   bool IsDivisible() const { return Current_ + Split_.GrainSize < End_; }
 
+  void DistributeWork() {
+    if (Split_.Threads.Size() != 1 && IsDivisible()) {
+      // take 1/parts of iterations for current thread
+      Range otherData{Current_ + (End_ - Current_ + Split_.Threads.Size() - 1) /
+                                     Split_.Threads.Size(),
+                      End_};
+      if (otherData.From < otherData.To) {
+        End_ = otherData.From;
+        Range otherThreads{Split_.Threads.From + 1, Split_.Threads.To};
+        size_t parts = std::min(std::min(Split_.K_SPLIT, otherThreads.Size()),
+                                otherData.Size());
+        auto threadsSize = otherThreads.Size();
+        auto threadStep = threadsSize / parts;
+        auto increareThreadStepFor = threadsSize % parts;
+        auto dataSize = otherData.Size(); // TODO: unify code with threads
+        auto dataStep = dataSize / parts;
+        auto increaseDataStepFor = dataSize % parts;
+        for (size_t i = 0; i != parts; ++i) {
+          auto threadSplit =
+              std::min(otherThreads.To, otherThreads.From + threadStep +
+                                            (i < increareThreadStepFor));
+          auto dataSplit =
+              std::min(otherData.To,
+                       otherData.From + dataStep + (i < increaseDataStepFor));
+          assert(otherData.From < dataSplit);
+          assert(otherThreads.From < threadSplit);
+          Sched_.run_on_thread(
+              Task<Scheduler, Func, DelayBalance, true>{
+                  Sched_, CurrentNode_, otherData.From, dataSplit, Func_,
+                  SplitData{.Threads = {otherThreads.From, threadSplit},
+                            .GrainSize = Split_.GrainSize}},
+              otherThreads.From);
+          otherThreads.From = threadSplit;
+          otherData.From = dataSplit;
+        }
+        assert(otherData.From == otherData.To);
+        assert(otherThreads.From == otherThreads.To ||
+               parts < Split_.K_SPLIT &&
+                   otherThreads.From + (Split_.K_SPLIT - parts) ==
+                       otherThreads.To);
+      }
+    }
+  }
+
   void operator()() {
     if constexpr (Initial) {
-      if (Split_.Threads.Size() != 1 && IsDivisible()) {
-        // take 1/parts of iterations for current thread
-        Range otherData{Current_ +
-                            (End_ - Current_ + Split_.Threads.Size() - 1) /
-                                Split_.Threads.Size(),
-                        End_};
-        if (otherData.From < otherData.To) {
-          End_ = otherData.From;
-          Range otherThreads{Split_.Threads.From + 1, Split_.Threads.To};
-          size_t parts = std::min(std::min(Split_.K_SPLIT, otherThreads.Size()),
-                                  otherData.Size());
-          auto threadsSize = otherThreads.Size();
-          auto threadStep = threadsSize / parts;
-          auto increareThreadStepFor = threadsSize % parts;
-          auto dataSize = otherData.Size(); // TODO: unify code with threads
-          auto dataStep = dataSize / parts;
-          auto increaseDataStepFor = dataSize % parts;
-          for (size_t i = 0; i != parts; ++i) {
-            auto threadSplit =
-                std::min(otherThreads.To, otherThreads.From + threadStep +
-                                              (i < increareThreadStepFor));
-            auto dataSplit =
-                std::min(otherData.To,
-                         otherData.From + dataStep + (i < increaseDataStepFor));
-            assert(otherData.From < dataSplit);
-            assert(otherThreads.From < threadSplit);
-            Sched_.run_on_thread(
-                Task<Scheduler, Func, DelayBalance, true>{
-                    Sched_, Barrier_, otherData.From, dataSplit, Func_,
-                    SplitData{.Threads = {otherThreads.From, threadSplit},
-                              .GrainSize = Split_.GrainSize}},
-                otherThreads.From);
-            otherThreads.From = threadSplit;
-            otherData.From = dataSplit;
-          }
-          assert(otherData.From == otherData.To);
-          assert(otherThreads.From == otherThreads.To ||
-                 parts < Split_.K_SPLIT &&
-                     otherThreads.From + (Split_.K_SPLIT - parts) ==
-                         otherThreads.To);
-        }
-      }
-    } else if (Stolen_) {
-      Stolen_->store(true, std::memory_order_relaxed);
-      Stolen_.reset();
+      DistributeWork();
+    } else {
+      //  CurrentNode_->OnStolen();
     }
+
     if constexpr (DelayBalance) {
       // at first we are executing job for INIT_TIME
       // and then create balancing task
@@ -121,63 +130,51 @@ struct Task {
       }
     }
 
-    std::shared_ptr<StolenFlag> stolen;
-    size_t itersToBalance = 0;
-    while (Current_ < End_) {
+    while (Current_ != End_) {
       // make balancing tasks for remaining iterations
-      if (itersToBalance == 0 && IsDivisible()) {
-        // TODO: check less times?
-        itersToBalance = 128;
-        if (!stolen || stolen->load(std::memory_order_relaxed)) {
-          if (!stolen) {
-            std::make_shared<std::atomic<bool>>(false);
-          } else {
-            stolen->store(false, std::memory_order_relaxed);
-          }
-          // TODO: maybe we need to check "depth" - number of being stolen
-          // times?
-          // TODO: divide not by 2, maybe proportionally or other way? maybe
-          // create more than one task?
-          size_t mid = (Current_ + End_) / 2;
-          // eigen's scheduler will push task to the current thread queue,
-          // then some other thread can steal this
-          Sched_.run(Task<Scheduler, Func, false>{
-              Sched_, Barrier_, mid, End_, Func_,
-              SplitData{.GrainSize = Split_.GrainSize}, stolen});
-          End_ = mid;
-        }
+      // TODO: check stolen? maybe not each time?
+      if (IsDivisible() /*&& CurrentNode_->AllStolen()*/) {
+        // TODO: maybe we need to check "depth" - number of being stolen
+        // times?
+        // TODO: divide not by 2, maybe proportionally or other way? maybe
+        // create more than one task?
+        size_t mid = (Current_ + End_) / 2;
+        // eigen's scheduler will push task to the current thread queue,
+        // then some other thread can steal this
+        Sched_.run(Task<Scheduler, Func, DelayBalance>{
+            Sched_, CurrentNode_, mid, End_, Func_,
+            SplitData{.GrainSize = Split_.GrainSize,
+                      .Depth = Split_.Depth + 1}});
+        End_ = mid;
       } else {
-        itersToBalance--;
+        Execute();
       }
-      Execute();
     }
-
-    Barrier_.Notify(Executed_);
+    CurrentNode_.reset();
   }
 
 private:
   void Execute() {
     Func_(Current_);
-    ++Executed_;
     ++Current_;
   }
 
   Scheduler &Sched_;
-  SpinBarrier &Barrier_;
   size_t Current_;
   size_t End_;
-  size_t Executed_{0};
   Func Func_;
   SplitData Split_;
-  std::shared_ptr<StolenFlag> Stolen_;
+
+  std::shared_ptr<TaskNode> CurrentNode_;
 };
 
 template <typename Sched, bool UseTimespan, typename F>
-auto MakeInitialTask(Sched &sched, SpinBarrier &barrier, size_t from, size_t to,
-                     F func, size_t threadCount, size_t grainSize = 1) {
+auto MakeInitialTask(Sched &sched, TaskNode::NodePtr &parent, size_t from,
+                     size_t to, F func, size_t threadCount,
+                     size_t grainSize = 1) {
   return Task<Sched, F, UseTimespan, true>{
       sched,
-      barrier,
+      parent,
       from,
       to,
       std::move(func),
@@ -187,12 +184,14 @@ auto MakeInitialTask(Sched &sched, SpinBarrier &barrier, size_t from, size_t to,
 template <typename Sched, bool UseTimespan, typename F>
 void ParallelFor(size_t from, size_t to, F func, size_t grainSize = 1) {
   Sched sched;
-  SpinBarrier barrier(to - from);
+  auto parentNode = std::make_shared<TaskNode>(nullptr);
   auto task = MakeInitialTask<Sched, UseTimespan>(
-      sched, barrier, from, to, std::move(func), GetNumThreads());
+      sched, parentNode, from, to, std::move(func), GetNumThreads());
   task();
   sched.join_main_thread();
-  barrier.Wait();
+  while (!parentNode.unique()) {
+    CpuRelax();
+  }
 }
 
 template <typename Sched, typename F>

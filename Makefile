@@ -38,10 +38,6 @@ bench_scan:
 	@mkdir -p raw_results/scan
 	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_scan_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/scan/$$x.json; done
 
-bench_noop:
-	@mkdir -p raw_results/noop
-	@for x in $(shell ls -1 cmake-build-release/benchmarks/bench_noop* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/benchmarks/$$x --benchmark_out_format=json --benchmark_out=raw_results/noop/$$x.json; done
-
 run_scheduling_dist:
 	@mkdir -p raw_results/scheduling_dist
 	@for x in $(shell ls -1 cmake-build-release/scheduling_dist/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/scheduling_dist/$$x > raw_results/scheduling_dist/$$x.json; done

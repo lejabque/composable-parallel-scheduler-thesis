@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-05T16:02:04+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_distributed_read_TBB_SIMPLE",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [41.67,24.04,10.41],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1119,
+      "real_time": 6.2428797171571830e+02,
+      "cpu_time": 2.9816116425379809e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 26,
+      "real_time": 2.5922591547266795e+04,
+      "cpu_time": 1.2435272065384616e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.4642069996334612e+04,
+      "cpu_time": 1.6587068104999992e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.4842086490243673e+04,
+      "cpu_time": 1.6721656455000001e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 16,
+      "real_time": 4.4242115633096546e+04,
+      "cpu_time": 2.1111818587499992e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_DISTRIBUTED_READ_TBB_SIMPLE/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 169,
+      "real_time": 4.1502269822553062e+03,
+      "cpu_time": 1.9902560656804714e+05,
+      "time_unit": "us"
+    }
+  ]
+}

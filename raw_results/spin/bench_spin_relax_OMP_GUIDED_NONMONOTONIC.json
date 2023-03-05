@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-05T16:02:42+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_relax_OMP_GUIDED_NONMONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [44.8,27.06,12.01],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 6475,
+      "real_time": 1.0833713510091701e+02,
+      "cpu_time": 5.1980532942084938e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1366,
+      "real_time": 5.1342986086397093e+02,
+      "cpu_time": 2.4626261163982424e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 962,
+      "real_time": 7.2695259895493234e+02,
+      "cpu_time": 3.4892731902286898e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 847,
+      "real_time": 8.2651938618531335e+02,
+      "cpu_time": 3.9636097685950423e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 66,
+      "real_time": 1.0969836518845776e+04,
+      "cpu_time": 5.2640054818181822e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_RELAX_OMP_GUIDED_NONMONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1908,
+      "real_time": 3.6768169279954157e+02,
+      "cpu_time": 1.7648588820754721e+04,
+      "time_unit": "us"
+    }
+  ]
+}

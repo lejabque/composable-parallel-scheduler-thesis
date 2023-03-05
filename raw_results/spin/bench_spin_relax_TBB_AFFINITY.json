@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-05T16:02:52+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_relax_TBB_AFFINITY",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [45.37,27.77,12.4],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 6269,
+      "real_time": 1.1741927107221146e+02,
+      "cpu_time": 5.5181509666613492e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1193,
+      "real_time": 5.8561724228885930e+02,
+      "cpu_time": 2.7794927703269070e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 905,
+      "real_time": 7.7218398894311974e+02,
+      "cpu_time": 3.6953570430939224e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 875,
+      "real_time": 8.0127961135336329e+02,
+      "cpu_time": 3.8325625817142864e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 10,
+      "real_time": 6.8026668019592762e+04,
+      "cpu_time": 3.1546473370000003e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_TBB_AFFINITY/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_RELAX_TBB_AFFINITY/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5086,
+      "real_time": 1.3760360001029343e+02,
+      "cpu_time": 6.4632847542272921e+03,
+      "time_unit": "us"
+    }
+  ]
+}

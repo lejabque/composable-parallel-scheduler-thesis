@@ -65,19 +65,12 @@ static std::vector<ScheduledTask> RunWithSpin(size_t threadNum,
   uint64_t spinPerIter = 100'000'000 / tasksPerThread;
   auto tasksCount = threadNum * tasksPerThread;
   std::vector<ScheduledTask> results(tasksCount);
-  std::atomic<size_t> reported(0);
   auto start = Now();
   ParallelFor(0, tasksCount, [&](size_t i) {
     results[i] = ScheduledTask(i, start);
     // emulating work
     for (size_t i = 0; i < spinPerIter; ++i) {
       CpuRelax();
-    }
-    if (tasksPerThread == 1) {
-      reported.fetch_add(1, std::memory_order_relaxed);
-      while (reported.load(std::memory_order_relaxed) != threadNum) {
-        CpuRelax();
-      }
     }
     results[i].Trace.ExecutionEnd = Now();
   });

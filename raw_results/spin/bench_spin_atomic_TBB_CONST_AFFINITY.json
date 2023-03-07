@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-07T13:22:52+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_atomic_TBB_CONST_AFFINITY",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [35.25,17.47,7.22],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1072,
+      "real_time": 6.5010922627328932e+02,
+      "cpu_time": 3.1018608488805970e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 26,
+      "real_time": 2.6780076539860322e+04,
+      "cpu_time": 1.2558466038461537e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 19,
+      "real_time": 3.6260385801525495e+04,
+      "cpu_time": 1.7317253415789471e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 19,
+      "real_time": 3.6455167359427403e+04,
+      "cpu_time": 1.7486408057894732e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 16,
+      "real_time": 4.4750681263394654e+04,
+      "cpu_time": 2.1268817643749998e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_ATOMIC_TBB_CONST_AFFINITY/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5279,
+      "real_time": 1.3357397806810417e+02,
+      "cpu_time": 6.2832928622845302e+03,
+      "time_unit": "us"
+    }
+  ]
+}

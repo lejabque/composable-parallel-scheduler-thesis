@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-07T13:23:10+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_distributed_read_EIGEN_STATIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [38.08,18.96,7.88],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1184,
+      "real_time": 5.9181301558792995e+02,
+      "cpu_time": 2.8377689543918921e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 27,
+      "real_time": 2.5885331134001415e+04,
+      "cpu_time": 1.2443650566666669e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.4596469486132264e+04,
+      "cpu_time": 1.6795277339999999e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.4794030012562871e+04,
+      "cpu_time": 1.6562177590000005e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 16,
+      "real_time": 4.3745488103013486e+04,
+      "cpu_time": 2.0995776743750004e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_DISTRIBUTED_READ_EIGEN_STATIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 119,
+      "real_time": 5.9050255447250456e+03,
+      "cpu_time": 2.8236156050420151e+05,
+      "time_unit": "us"
+    }
+  ]
+}

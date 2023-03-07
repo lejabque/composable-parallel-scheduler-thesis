@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-07T13:24:39+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_relax_OMP_DYNAMIC_MONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [40.45,25,11.07],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 13851,
+      "real_time": 5.0443736967429572e+01,
+      "cpu_time": 2.4211401299545159e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1366,
+      "real_time": 5.1285991156105592e+02,
+      "cpu_time": 2.4611346493411416e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 964,
+      "real_time": 7.2608858972973349e+02,
+      "cpu_time": 3.4850643620331946e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 258,
+      "real_time": 2.7058156199984310e+03,
+      "cpu_time": 1.2967637825581392e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 67,
+      "real_time": 1.0610563889034649e+04,
+      "cpu_time": 5.0925690925373137e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_RELAX_OMP_DYNAMIC_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 16,
+      "real_time": 4.3859902478288859e+04,
+      "cpu_time": 2.1052196050000004e+06,
+      "time_unit": "us"
+    }
+  ]
+}

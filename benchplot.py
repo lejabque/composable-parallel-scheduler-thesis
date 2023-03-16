@@ -80,9 +80,10 @@ def parse_benchmarks(folder_name):
     return benchmarks_by_type
 
 
+# TODO: refactor results and replace dicts with classes
 def plot_scheduling_benchmarks(scheduling_times, verbose):
     # x for thread_idx, y for time
-    min_times = [(bench_type, [[min([t["trace"]["scheduling_stage"] for t in times]) for times in iter.values()] for iter in results]) for bench_type, results in scheduling_times.items()]
+    min_times = [(bench_type, [[min([t["trace"]["execution_start"] - iter["start"] for t in tasks]) for tasks in iter["tasks"].values()] for iter in results]) for bench_type, results in scheduling_times.items()]
     runtimes = list(set(name.split("_")[0] for (name, _) in min_times))
     runtimes.append("all")
     plots = {runtime: plt.subplots(figsize=(18, 6)) for runtime in runtimes}
@@ -148,11 +149,11 @@ def plot_scheduling_dist(scheduling_dist, verbose):
             ax.set_title("Distribution of tasks to threads")
         # ax.get_figure().tight_layout()
 
-        thread_count = len(scheduling_dist[iter])
-        task_count = max(max(t["index"] for t in tasks) for tasks in scheduling_dist[iter].values()) + 1
+        thread_count = len(scheduling_dist[iter]["tasks"])
+        task_count = max(max(t["index"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()) + 1
         task_height = int(task_count / thread_count)
         data = np.ones((thread_count * task_height, task_count))
-        for thread_id, tasks in sorted(scheduling_dist[iter].items(), key=lambda x: x[0]):
+        for thread_id, tasks in sorted(scheduling_dist[iter]["tasks"].items(), key=lambda x: x[0]):
             for t in tasks:
                 idx = thread_count - 1 if thread_id == "-1" else int(thread_id)
                 # data[idx, t["index"]] = 0
@@ -178,12 +179,12 @@ def plot_scheduling_dist(scheduling_dist, verbose):
         ax.xaxis.set_label_position('top')
         # ax.get_figure().tight_layout()
 
-        thread_count = len(scheduling_dist[iter].keys())
-        cpu_count = len(set(t["cpu"] for tasks in scheduling_dist[iter].values() for t in tasks))
+        thread_count = len(scheduling_dist[iter]["tasks"].keys())
+        cpu_count = len(set(t["cpu"] for tasks in scheduling_dist[iter]["tasks"].values() for t in tasks))
         cpus = {}  # mapping cpu_id -> idx
         threads = {}  # mapping thread_id -> idx
         data = np.ones((thread_count, cpu_count))
-        for thread_id, tasks in scheduling_dist[iter].items():
+        for thread_id, tasks in scheduling_dist[iter]["tasks"].items():
             for t in tasks:
                 if thread_id not in threads:
                     threads[thread_id] = len(threads)
@@ -201,11 +202,11 @@ def plot_scheduling_dist(scheduling_dist, verbose):
         if iter == 0:
             ax.set_title("Time since start of first executed task for each thread (sorted by time)")
 
-        thread_count = len(scheduling_dist[iter])
-        times = [min(t["trace"]["scheduling_stage"] for t in tasks) for tasks in scheduling_dist[iter].values()]
+        thread_count = len(scheduling_dist[iter]["tasks"])
+        times = [min(t["trace"]["execution_start"] - scheduling_dist[iter]["start"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]
         times = np.sort(np.asarray(times))
         ax.plot(range(len(times)), times, label="Start time")
-        times_end = [min(t["trace"]["end_stage"] for t in tasks) for tasks in scheduling_dist[iter].values()]
+        times_end = [min(scheduling_dist[iter]["end"] - t["trace"]["execution_end"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]
         times_end = np.sort(np.asarray(times_end))
         ax.plot(range(len(times_end)), times_end, label="End time")
         ax.legend()
@@ -221,7 +222,7 @@ def plot_scheduling_dist_item(item, res_path, verbose):
     plt.close()
     print(f"Plotting {bench_mode} took {time.time() - time_before}s")
     for iter in res["results"]:
-        for thread_id, tasks in iter.items():
+        for thread_id, tasks in iter["tasks"].items():
             unique_cpus = set(t["cpu"] for t in tasks)
             if len(unique_cpus) > 1:
                 print(f"{bench_mode}: thread {thread_id} has tasks executed on differenet cpus: {unique_cpus}")

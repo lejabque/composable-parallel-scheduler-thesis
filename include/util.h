@@ -34,6 +34,7 @@ inline int GetCpuIndex() {
 }
 
 using Timestamp = uint64_t;
+// using Timestamp = std::chrono::system_clock::time_point;
 
 inline Timestamp Now() {
 #if defined(__x86_64__)
@@ -45,6 +46,9 @@ inline Timestamp Now() {
 #else
 #error "Unsupported architecture
 #endif
+  // return std::chrono::duration_cast<std::chrono::nanoseconds>(
+  //            std::chrono::high_resolution_clock::now().time_since_epoch())
+  //     .count();
 }
 
 inline void CpuRelax() {

@@ -54,9 +54,11 @@ static IterationResult RunWithSpin(size_t threadNum,
     for (size_t i = 0; i < spinPerIter; ++i) {
       CpuRelax();
     }
+    // TODO: fence?
     result.Tasks[i].Trace.OnExecuted();
     WroteTrace = Now();
   });
+  result.End = Now();
   return result;
 }
 
@@ -111,7 +113,7 @@ static void PrintResults(size_t threadNum,
         auto task = tasks[i];
         std::cout << "{\"index\": " << task.TaskIdx << ", \"trace\": {\""
                   << "prev_trace\": " << task.Trace.PreviousTrace
-                  << ", \"execution_start\": " << task.Trace.ExecutionEnd
+                  << ", \"execution_start\": " << task.Trace.ExecutionStart
                   << ", \"execution_end\": " << task.Trace.ExecutionEnd
                   << "}, \"cpu\": " << task.SchedCpu << "}"
                   << (i == tasks.size() - 1 ? "" : ", ");

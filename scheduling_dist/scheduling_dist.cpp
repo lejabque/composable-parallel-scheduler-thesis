@@ -91,7 +91,8 @@ static void PrintResults(size_t threadNum,
                          std::vector<IterationResult> &results) {
   std::cout << "{" << std::endl;
   std::cout << "\"thread_num\": " << threadNum << "," << std::endl;
-  std::cout << "\"tasks_num\": " << results.size() << "," << std::endl;
+  std::cout << "\"tasks_num\": " << results.front().Tasks.size() << ","
+            << std::endl;
   std::cout << "\"results\": [" << std::endl;
   for (size_t iter = 0; iter != results.size(); ++iter) {
     auto &&res = results[iter].Tasks;

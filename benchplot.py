@@ -207,8 +207,9 @@ def plot_scheduling_dist(scheduling_dist, verbose):
         times = np.sort(np.asarray(times))
         ax.plot(range(len(times)), times, label="Start time")
         times_end = [min(scheduling_dist[iter]["end"] - t["trace"]["execution_end"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]
-        times_end = np.sort(np.asarray(times_end))
-        ax.plot(range(len(times_end)), times_end, label="End time")
+        time_end = min(times_end)
+        # times_end = np.sort(np.asarray(times_end))
+        ax.plot(range(len(times)), [time_end] * len(times_end), label="End time")
         ax.legend()
 
     return fig

@@ -17,6 +17,7 @@ dependencies:
   - numpy
   - seaborn
   - pandas
+  - ipykernel
   # - libclang-cpp
   # - libcxx
   # - libstdcxx-ng

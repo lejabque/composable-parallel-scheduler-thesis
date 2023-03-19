@@ -99,3 +99,9 @@ option(ENABLE_SCHEDULING "Enable scheduling distribution bench" ON)
 if (ENABLE_SCHEDULING)
   add_subdirectory(scheduling_dist)
 endif()
+
+option(ENABLE_TRACE_SPIN "Enable traced spin bench" ON)
+if (ENABLE_TRACE_SPIN)
+  add_subdirectory(trace_spin)
+endif()
+

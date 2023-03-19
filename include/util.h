@@ -28,11 +28,6 @@ inline ThreadId GetThreadIndex() {
   return id;
 }
 
-inline int GetCpuIndex() {
-  thread_local static int id = sched_getcpu();
-  return id;
-}
-
 using Timestamp = uint64_t;
 // using Timestamp = std::chrono::system_clock::time_point;
 

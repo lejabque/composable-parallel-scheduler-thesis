@@ -42,7 +42,11 @@ run_scheduling_dist:
 	@mkdir -p raw_results/scheduling_dist
 	@for x in $(shell ls -1 cmake-build-release/scheduling_dist/scheduling_dist_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/scheduling_dist/$$x > raw_results/scheduling_dist/$$x.json; done
 
-bench: clean_bench bench_dir clean release bench_spmv bench_spin bench_reduce bench_scan run_scheduling_dist
+run_trace_spin:
+	@mkdir -p raw_results/trace_spin
+	@for x in $(shell ls -1 cmake-build-release/trace_spin/trace_spin_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/trace_spin/$$x > raw_results/trace_spin/$$x.json; done
+
+bench: clean_bench bench_dir clean release bench_spmv bench_spin bench_reduce bench_scan run_scheduling_dist run_trace_spin
 
 bench_tests:
 	@for x in $(shell ls -1 cmake-build-debug/benchmarks/tests/*tests* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-debug/benchmarks/tests/$$x; done

@@ -1,7 +1,9 @@
 #include <benchmark/benchmark.h>
 
 #include "../include/parallel_for.h"
+#include "../include/trace.h"
 #include "spmv.h"
+#include <fstream>
 #include <iostream>
 
 #define RELAX 1
@@ -20,16 +22,33 @@ template <typename T> struct Aligned {
 
 } // namespace
 
-template <typename F> void RunParallelFor(size_t iters, size_t tasks, F &&f) {
+static std::string GetSpinPayload() {
+#if SPIN_PAYLOAD == RELAX
+  return "RELAX";
+#elif SPIN_PAYLOAD == ATOMIC
+  return "ATOMIC";
+#elif SPIN_PAYLOAD == DISTRIBUTED_READ
+  return "DISTRIBUTED_READ";
+#elif SPIN_PAYLOAD == THREADLOCAL
+  return "THREADLOCAL";
+#else
+  static_assert(false, "Unsupported mode");
+#endif
+}
+
+template <typename F>
+void RunParallelFor(Tracing::Tracer &tracer, size_t iters, size_t tasks,
+                    F &&f) {
   for (size_t iter = 0; iter != iters; ++iter) {
-    ParallelFor(0, tasks, f);
+    tracer.RunIteration(tasks, f);
   }
 }
 
 static void BM_Spin(benchmark::State &state) {
+  Tracing::Tracer tracer;
 #if SPIN_PAYLOAD == RELAX
   for (auto _ : state) {
-    RunParallelFor(state.range(2), state.range(0),
+    RunParallelFor(tracer, state.range(2), state.range(0),
                    [cnt = state.range(1)](size_t i) {
                      for (size_t i = 0; i != cnt; ++i) {
                        CpuRelax();
@@ -39,7 +58,7 @@ static void BM_Spin(benchmark::State &state) {
 #elif SPIN_PAYLOAD == ATOMIC
   auto atomicPtr = std::make_unique<Aligned<std::atomic<int>>>();
   for (auto _ : state) {
-    RunParallelFor(state.range(2), state.range(0),
+    RunParallelFor(tracer, state.range(2), state.range(0),
                    [p = atomicPtr.get(), cnt = state.range(1)](size_t i) {
                      volatile int y = 0;
                      for (size_t i = 0; i != cnt; ++i) {
@@ -53,7 +72,7 @@ static void BM_Spin(benchmark::State &state) {
     p = {std::make_unique<Aligned<int>>()};
   }
   for (auto _ : state) {
-    RunParallelFor(state.range(2), state.range(0),
+    RunParallelFor(tracer, state.range(2), state.range(0),
                    [&pointers, cnt = state.range(1)](size_t i) {
                      volatile int y = 0;
                      auto p = pointers[i].value.get();
@@ -64,7 +83,7 @@ static void BM_Spin(benchmark::State &state) {
   }
 #elif SPIN_PAYLOAD == THREADLOCAL
   for (auto _ : state) {
-    RunParallelFor(state.range(2), state.range(0),
+    RunParallelFor(tracer, state.range(2), state.range(0),
                    [cnt = state.range(1)](size_t i) {
                      static thread_local int x = 0;
                      volatile int y = 0;
@@ -76,20 +95,9 @@ static void BM_Spin(benchmark::State &state) {
 #else
   static_assert(false, "Unsupported mode");
 #endif
-}
-
-static std::string GetSpinPayload() {
-#if SPIN_PAYLOAD == RELAX
-  return "RELAX";
-#elif SPIN_PAYLOAD == ATOMIC
-  return "ATOMIC";
-#elif SPIN_PAYLOAD == DISTRIBUTED_READ
-  return "DISTRIBUTED_READ";
-#elif SPIN_PAYLOAD == THREADLOCAL
-  return "THREADLOCAL";
-#else
-  static_assert(false, "Unsupported mode");
-#endif
+  // std::ofstream out(std::string("Spin_") + GetSpinPayload() + "_" +
+  //                   GetParallelMode() + ".json");
+  // out << tracer.ToJson(GetNumThreads());
 }
 
 static constexpr size_t ScaleIterations(size_t count) {

@@ -83,7 +83,7 @@ def parse_benchmarks(folder_name):
 # TODO: refactor results and replace dicts with classes
 def plot_scheduling_benchmarks(scheduling_times, verbose):
     # x for thread_idx, y for time
-    min_times = [(bench_type, [[min([t["trace"]["execution_start"] - iter["start"] for t in tasks]) for tasks in iter["tasks"].values()] for iter in results]) for bench_type, results in scheduling_times.items()]
+    min_times = [(bench_type, [[min([t["trace"]["execution_start"] for t in tasks]) for tasks in iter["tasks"].values()] for iter in results]) for bench_type, results in scheduling_times.items()]
     runtimes = list(set(name.split("_")[0] for (name, _) in min_times))
     runtimes.append("all")
     plots = {runtime: plt.subplots(figsize=(18, 6)) for runtime in runtimes}
@@ -203,7 +203,7 @@ def plot_scheduling_dist(scheduling_dist, verbose):
             ax.set_title("Time since start of first executed task for each thread (sorted by time)")
 
         thread_count = len(scheduling_dist[iter]["tasks"])
-        times = [min(t["trace"]["execution_start"] - scheduling_dist[iter]["start"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]
+        times = [min(t["trace"]["execution_start"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]
         times = np.sort(np.asarray(times))
         ax.plot(range(len(times)), times, label="Start time")
         times_end = [min(scheduling_dist[iter]["end"] - t["trace"]["execution_end"] for t in tasks) for tasks in scheduling_dist[iter]["tasks"].values()]

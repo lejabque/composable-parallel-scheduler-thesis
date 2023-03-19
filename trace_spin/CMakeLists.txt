@@ -1,0 +1,8 @@
+foreach(mode IN LISTS MODES)
+    if (mode STREQUAL "SERIAL")
+        continue()
+    endif()
+    set(target trace_spin_${mode})
+    add_target(${target} trace_spin.cpp ${mode})
+    target_compile_definitions(${target} PRIVATE)
+endforeach()

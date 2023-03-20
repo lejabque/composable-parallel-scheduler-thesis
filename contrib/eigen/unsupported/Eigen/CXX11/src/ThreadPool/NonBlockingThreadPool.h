@@ -9,7 +9,7 @@
 
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
-// #define EIGEN_POOL_MAILSLOT
+#define EIGEN_POOL_RUNNEXT
 
 #include <atomic>
 #include "./InternalHeaderCheck.h"
@@ -101,14 +101,14 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   void RunOnThread(std::function<void()> fn, size_t threadIndex) {
     threadIndex = threadIndex % num_threads_;
     Task t = env_.CreateTask(std::move(fn));
-    #ifdef EIGEN_POOL_MAILSLOT
+#ifdef EIGEN_POOL_RUNNEXT
     auto p = new Task(std::move(t));  // todo: free on end?
     Task* expected = nullptr;
-    if (thread_data_[threadIndex].mailslot.compare_exchange_strong(expected, p, std::memory_order_relaxed)) {
+    if (thread_data_[threadIndex].runnext.compare_exchange_strong(expected, p, std::memory_order_relaxed)) {
       return;
     }
     t = std::move(*p);
-    #endif
+#endif
     Queue& q = thread_data_[threadIndex].queue;
     t = q.PushBack(std::move(t));
     if (t.f) {
@@ -242,7 +242,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
     Queue queue;
-    std::atomic<Task*> mailslot;
+    std::atomic<Task*> runnext;
   };
 
   Environment env_;
@@ -286,17 +286,17 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       // pools tend to be used for.
       while (!cancelled_) {
         Task t;
-        #ifdef EIGEN_POOL_MAILSLOT
-        auto p = thread_data_[thread_id].mailslot.load(std::memory_order_relaxed);
+#ifdef EIGEN_POOL_RUNNEXT
+        auto p = thread_data_[thread_id].runnext.load(std::memory_order_relaxed);
         if (p) {
           auto success =
-              thread_data_[thread_id].mailslot.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+              thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
           if (success) {
             t = std::move(*p);
             delete p;
           }
         }
-        #endif
+#endif
         if (!t.f) {
           t = q.PopFront();
         }
@@ -317,10 +317,10 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     } else {
       while (!cancelled_) {
         Task t;
-        auto p = thread_data_[thread_id].mailslot.load(std::memory_order_relaxed);
+        auto p = thread_data_[thread_id].runnext.load(std::memory_order_relaxed);
         if (p) {
           auto success =
-              thread_data_[thread_id].mailslot.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+              thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
           if (success) {
             t = std::move(*p);
             delete p;

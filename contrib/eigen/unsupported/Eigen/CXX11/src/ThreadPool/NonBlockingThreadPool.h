@@ -9,7 +9,9 @@
 
 #ifndef EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
 #define EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
+// #define EIGEN_POOL_MAILSLOT
 
+#include <atomic>
 #include "./InternalHeaderCheck.h"
 
 namespace Eigen {
@@ -97,9 +99,17 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
   }
 
   void RunOnThread(std::function<void()> fn, size_t threadIndex) {
-    Task t = env_.CreateTask(std::move(fn));
     threadIndex = threadIndex % num_threads_;
-    Queue& q = thread_data_[threadIndex].mailbox;
+    Task t = env_.CreateTask(std::move(fn));
+    #ifdef EIGEN_POOL_MAILSLOT
+    auto p = new Task(std::move(t));  // todo: free on end?
+    Task* expected = nullptr;
+    if (thread_data_[threadIndex].mailslot.compare_exchange_strong(expected, p, std::memory_order_relaxed)) {
+      return;
+    }
+    t = std::move(*p);
+    #endif
+    Queue& q = thread_data_[threadIndex].queue;
     t = q.PushBack(std::move(t));
     if (t.f) {
       // failed to push, execute directly
@@ -232,7 +242,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     std::unique_ptr<Thread> thread;
     std::atomic<unsigned> steal_partition;
     Queue queue;
-    Queue mailbox;
+    std::atomic<Task*> mailslot;
   };
 
   Environment env_;
@@ -257,7 +267,6 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     pt->rand = GlobalThreadIdHash();
     pt->thread_id = thread_id;
     Queue& q = thread_data_[thread_id].queue;
-    Queue& mailbox = thread_data_[thread_id].mailbox;
     EventCount::Waiter* waiter = nullptr;
     if (!use_main_thread_ || thread_id != 0) {
       // main thread does not need a waiter
@@ -276,7 +285,18 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       // counter-productive for the types of I/O workloads the single thread
       // pools tend to be used for.
       while (!cancelled_) {
-        Task t = mailbox.PopFront();
+        Task t;
+        #ifdef EIGEN_POOL_MAILSLOT
+        auto p = thread_data_[thread_id].mailslot.load(std::memory_order_relaxed);
+        if (p) {
+          auto success =
+              thread_data_[thread_id].mailslot.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+          if (success) {
+            t = std::move(*p);
+            delete p;
+          }
+        }
+        #endif
         if (!t.f) {
           t = q.PopFront();
         }
@@ -296,8 +316,16 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
       }
     } else {
       while (!cancelled_) {
-        // check mailbox at first
-        Task t = mailbox.PopFront();
+        Task t;
+        auto p = thread_data_[thread_id].mailslot.load(std::memory_order_relaxed);
+        if (p) {
+          auto success =
+              thread_data_[thread_id].mailslot.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+          if (success) {
+            t = std::move(*p);
+            delete p;
+          }
+        }
         if (!t.f) {
           t = q.PopFront();
         }

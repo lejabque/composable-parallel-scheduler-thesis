@@ -268,8 +268,7 @@ if __name__ == "__main__":
             with Pool() as pool:
                 # call the function for each item in parallel
                 pool.map(partial(plot_scheduling_dist_item, res_path=current_res_path, verbose=verbose), benchmarks["scheduling_dist"][""].items())
-
-        else:
+        elif subdir != "trace_spin":
             current_res_path = os.path.join(res_path, subdir)
             if not os.path.exists(current_res_path):
                 os.makedirs(current_res_path)

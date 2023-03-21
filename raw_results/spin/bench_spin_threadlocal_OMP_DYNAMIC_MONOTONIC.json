@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-21T12:21:39+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_threadlocal_OMP_DYNAMIC_MONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [43.63,32.45,30.28],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 2176,
+      "real_time": 3.2221575812025765e+02,
+      "cpu_time": 1.5465603975183823e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 52,
+      "real_time": 1.3350062108097169e+04,
+      "cpu_time": 6.4079501730769221e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 37,
+      "real_time": 1.8955364319923763e+04,
+      "cpu_time": 9.0984286027027003e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 35,
+      "real_time": 1.9838540016540461e+04,
+      "cpu_time": 9.5222317828571389e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 66,
+      "real_time": 1.0713763182249033e+04,
+      "cpu_time": 5.1423600348484842e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_THREADLOCAL_OMP_DYNAMIC_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 14,
+      "real_time": 5.7238492116864240e+04,
+      "cpu_time": 2.4642075557142836e+06,
+      "time_unit": "us"
+    }
+  ]
+}

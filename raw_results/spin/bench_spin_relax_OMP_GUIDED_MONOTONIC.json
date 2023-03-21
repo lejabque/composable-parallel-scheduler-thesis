@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-21T12:20:46+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_relax_OMP_GUIDED_MONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [42.96,30.23,29.48],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:1024/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 5479,
+      "real_time": 1.2109051457687677e+02,
+      "cpu_time": 5.8108469885015520e+03,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:48/iters:1048576/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1362,
+      "real_time": 5.1624355386401066e+02,
+      "cpu_time": 2.4771437518355353e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:8192/iters:8192/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 885,
+      "real_time": 7.9329273437207701e+02,
+      "cpu_time": 3.8075284225988697e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:65536/iters:1024/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 531,
+      "real_time": 1.2973292472924891e+03,
+      "cpu_time": 6.2268891732580021e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 60,
+      "real_time": 1.1679855501279235e+04,
+      "cpu_time": 5.6061537833333318e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_RELAX_OMP_GUIDED_MONOTONIC/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 83,
+      "real_time": 8.1917701221733205e+03,
+      "cpu_time": 3.9201817819277110e+05,
+      "time_unit": "us"
+    }
+  ]
+}

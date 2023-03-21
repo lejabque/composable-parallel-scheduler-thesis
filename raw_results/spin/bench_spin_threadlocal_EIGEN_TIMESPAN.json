@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-03-21T12:21:33+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_threadlocal_EIGEN_TIMESPAN",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [42.65,31.88,30.08],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 2001,
+      "real_time": 3.5117178418110871e+02,
+      "cpu_time": 1.7025667301349324e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 52,
+      "real_time": 1.3582719221281317e+04,
+      "cpu_time": 6.4657847961538460e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.4349908493459225e+04,
+      "cpu_time": 1.6393322704999996e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.5033931536599994e+04,
+      "cpu_time": 1.6814726879999996e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:48/iters:1/calls:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 35,
+      "real_time": 2.0158560281353337e+04,
+      "cpu_time": 9.7354340828571422e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "Spin_THREADLOCAL_EIGEN_TIMESPAN/tasks:1048576/iters:1/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 53,
+      "real_time": 1.2200026790488440e+04,
+      "cpu_time": 5.8866055490566045e+05,
+      "time_unit": "us"
+    }
+  ]
+}

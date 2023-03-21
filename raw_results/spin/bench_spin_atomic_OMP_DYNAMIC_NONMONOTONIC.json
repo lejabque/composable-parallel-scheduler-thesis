@@ -1,0 +1,94 @@
+{
+  "context": {
+    "date": "2023-03-21T12:18:21+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spin_atomic_OMP_DYNAMIC_NONMONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [27.51,21.28,26.93],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:1024/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1129,
+      "real_time": 6.3388946856329983e+02,
+      "cpu_time": 3.0425299999999996e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:48/iters:33554432/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 25,
+      "real_time": 2.6712256781756878e+04,
+      "cpu_time": 1.2821536048000001e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:8192/iters:262144/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.5118146007880569e+04,
+      "cpu_time": 1.6852534760000005e+06,
+      "time_unit": "us"
+    },
+    {
+      "name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "Spin_ATOMIC_OMP_DYNAMIC_NONMONOTONIC/tasks:65536/iters:32768/calls:1/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 20,
+      "real_time": 3.5623021982610226e+04,
+      "cpu_time": 1.7095999144999993e+06,
+      "time_unit": "us"
+    }

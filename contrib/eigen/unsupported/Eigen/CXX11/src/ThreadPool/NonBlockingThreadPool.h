@@ -102,9 +102,9 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
     threadIndex = threadIndex % num_threads_;
     Task t = env_.CreateTask(std::move(fn));
 #ifdef EIGEN_POOL_RUNNEXT
-    auto p = new Task(std::move(t));  // todo: free on end?
+    auto p = new Task(std::move(t));
     Task* expected = nullptr;
-    if (thread_data_[threadIndex].runnext.compare_exchange_strong(expected, p, std::memory_order_relaxed)) {
+    if (thread_data_[threadIndex].runnext.compare_exchange_strong(expected, p, std::memory_order_release)) {
       return;
     }
     t = std::move(*p);
@@ -289,8 +289,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
 #ifdef EIGEN_POOL_RUNNEXT
         auto p = thread_data_[thread_id].runnext.load(std::memory_order_relaxed);
         if (p) {
-          auto success =
-              thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+          auto success = thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_acquire);
           if (success) {
             t = std::move(*p);
             delete p;
@@ -319,8 +318,7 @@ class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
         Task t;
         auto p = thread_data_[thread_id].runnext.load(std::memory_order_relaxed);
         if (p) {
-          auto success =
-              thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
+          auto success = thread_data_[thread_id].runnext.compare_exchange_strong(p, nullptr, std::memory_order_relaxed);
           if (success) {
             t = std::move(*p);
             delete p;

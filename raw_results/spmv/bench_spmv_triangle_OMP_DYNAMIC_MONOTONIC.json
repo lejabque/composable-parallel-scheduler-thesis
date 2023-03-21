@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:17:06+03:00",
+    "date": "2023-03-21T13:19:59+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_spmv_triangle_OMP_DYNAMIC_MONOTONIC",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [25.2,20.43,27.21],
+    "load_avg": [30.3,15.13,8.25],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 934,
-      "real_time": 7.4772525686427662e+02,
-      "cpu_time": 3.5889395053533190e+04,
+      "iterations": 936,
+      "real_time": 7.4658341880919590e+02,
+      "cpu_time": 3.5834579861111117e+04,
       "time_unit": "us"
     }
   ]

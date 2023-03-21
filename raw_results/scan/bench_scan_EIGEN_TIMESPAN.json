@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:27:23+03:00",
+    "date": "2023-03-21T13:32:00+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_scan_EIGEN_TIMESPAN",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [7.19,20.31,26.48],
+    "load_avg": [11.75,20.22,18.19],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 569,
-      "real_time": 1.2109921623171947e+03,
-      "cpu_time": 5.8202313286467492e+04,
+      "iterations": 531,
+      "real_time": 1.3103166668765289e+03,
+      "cpu_time": 6.3258849416195859e+04,
       "time_unit": "us"
     }
   ]

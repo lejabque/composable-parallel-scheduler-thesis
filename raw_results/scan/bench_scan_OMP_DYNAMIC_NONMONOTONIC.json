@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:27:27+03:00",
+    "date": "2023-03-21T13:32:05+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_scan_OMP_DYNAMIC_NONMONOTONIC",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [6.7,19.99,26.34],
+    "load_avg": [10.89,19.9,18.09],
     "library_build_type": "release"
   },
   "benchmarks": [

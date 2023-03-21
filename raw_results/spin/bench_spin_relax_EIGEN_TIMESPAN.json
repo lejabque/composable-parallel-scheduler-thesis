@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:20:31+03:00",
+    "date": "2023-03-21T13:23:59+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_spin_relax_EIGEN_TIMESPAN",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [41.61,29.33,29.19],
+    "load_avg": [44.26,28.52,15],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 2805,
-      "real_time": 2.5798265229571950e+02,
-      "cpu_time": 1.2489226830659538e+04,
+      "iterations": 13742,
+      "real_time": 5.0258479135176309e+01,
+      "cpu_time": 2.4100693778198224e+03,
       "time_unit": "us"
     },
     {
@@ -59,9 +59,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 768,
-      "real_time": 9.1302562456500402e+02,
-      "cpu_time": 4.3750094322916666e+04,
+      "iterations": 844,
+      "real_time": 8.2915683577093182e+02,
+      "cpu_time": 3.9807758661137443e+04,
       "time_unit": "us"
     },
     {
@@ -73,9 +73,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 473,
-      "real_time": 1.4892562152719397e+03,
-      "cpu_time": 7.1069460486257929e+04,
+      "iterations": 596,
+      "real_time": 1.1764357707169431e+03,
+      "cpu_time": 5.6367204362416102e+04,
       "time_unit": "us"
     },
     {
@@ -87,9 +87,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 247,
-      "real_time": 2.6448512570517751e+03,
-      "cpu_time": 1.2632259068825918e+05,
+      "iterations": 408,
+      "real_time": 1.6932532341931674e+03,
+      "cpu_time": 8.1174581274509808e+04,
       "time_unit": "us"
     },
     {
@@ -101,9 +101,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 32,
-      "real_time": 2.1962795639410615e+04,
-      "cpu_time": 1.0498979740625005e+06,
+      "iterations": 36,
+      "real_time": 1.9475034438073635e+04,
+      "cpu_time": 9.4639960111111158e+05,
       "time_unit": "us"
     },
     {
@@ -115,9 +115,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 56,
-      "real_time": 1.0469824824083064e+04,
-      "cpu_time": 5.0556589553571388e+05,
+      "iterations": 54,
+      "real_time": 1.0548789623296923e+04,
+      "cpu_time": 5.0661530444444454e+05,
       "time_unit": "us"
     }
   ]

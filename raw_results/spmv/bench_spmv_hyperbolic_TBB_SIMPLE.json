@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:16:38+03:00",
+    "date": "2023-03-21T13:19:24+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_spmv_hyperbolic_TBB_SIMPLE",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [18.62,18.79,26.88],
+    "load_avg": [22.1,11.76,6.94],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 2093,
-      "real_time": 3.3587059233029720e+02,
-      "cpu_time": 1.5971530969899666e+04,
+      "iterations": 2122,
+      "real_time": 3.3341550894088613e+02,
+      "cpu_time": 1.5753411489161172e+04,
       "time_unit": "us"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-03-21T12:22:50+03:00",
+    "date": "2023-03-21T13:27:01+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_reduce_EIGEN_SIMPLE",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [46.1,35.51,31.5],
+    "load_avg": [48.29,37.37,20.9],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 348,
-      "real_time": 2.0073162065283664e+03,
-      "cpu_time": 9.6338302614942775e+04,
+      "iterations": 337,
+      "real_time": 2.0739252814464826e+03,
+      "cpu_time": 9.9530768902077150e+04,
       "time_unit": "us"
     }
   ]

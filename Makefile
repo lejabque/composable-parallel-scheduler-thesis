@@ -46,6 +46,9 @@ run_trace_spin:
 	@mkdir -p raw_results/trace_spin
 	@for x in $(shell ls -1 cmake-build-release/trace_spin/trace_spin_* | xargs -n 1 basename | sort ) ; do echo "Running $$x"; $(OMP_FLAGS) cmake-build-release/trace_spin/$$x > raw_results/trace_spin/$$x.json; done
 
+run_timespan_tuner:
+	@for x in $(shell ls -1 cmake-build-release/timespan_tuner/timespan_tuner_* | xargs -n 1 basename | sort ) ; do $(OMP_FLAGS) cmake-build-release/timespan_tuner/$$x; done
+
 bench: clean_bench bench_dir clean release bench_spmv bench_spin bench_reduce bench_scan run_scheduling_dist run_trace_spin
 
 bench_tests:

@@ -105,3 +105,8 @@ if (ENABLE_TRACE_SPIN)
   add_subdirectory(trace_spin)
 endif()
 
+option(ENABLE_TIMESPAN_TUNER "Enable timespan tuner" ON)
+if (ENABLE_TIMESPAN_TUNER)
+  add_subdirectory(timespan_tuner)
+endif()
+

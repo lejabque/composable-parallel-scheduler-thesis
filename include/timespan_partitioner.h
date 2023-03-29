@@ -56,7 +56,19 @@ struct TaskNode {
 template <typename Scheduler, typename Func, bool DelayBalance,
           bool Initial = false>
 struct Task {
-  static constexpr uint64_t INIT_TIME = 100000; // todo: tune time for platforms
+
+  static constexpr uint64_t INIT_TIME = [] {
+    // should be calculated using timespan_tuner with EIGEN_SIMPLE
+    // currently 0.99 percentile for maximums is used: 99% of iterations should fit scheduling in timespan
+#if defined(__x86_64__)
+    return 17000;
+#elif defined(__aarch64__)
+    retur 200;
+#else
+#error "Unsupported architecture
+#endif
+  }();
+
   using StolenFlag = std::atomic<bool>;
 
   Task(Scheduler &sched, TaskNode::NodePtr &parent, size_t from, size_t to,

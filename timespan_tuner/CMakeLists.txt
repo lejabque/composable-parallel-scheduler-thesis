@@ -1,0 +1,7 @@
+foreach(mode IN LISTS MODES)
+    if (mode STREQUAL "SERIAL")
+      continue()
+    endif()
+    set(target timespan_tuner_${mode})
+    add_target(${target} tuner.cpp ${mode})
+endforeach()

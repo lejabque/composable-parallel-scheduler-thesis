@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-04-04T13:13:52+03:00",
+    "date": "2023-04-04T22:05:00+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_mtranspose_OMP_STATIC",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [95.99,52.68,28.43],
+    "load_avg": [180.61,84.07,40.35],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 32,
-      "real_time": 2.0071473438292742e+04,
-      "cpu_time": 9.6340869156250008e+05,
+      "iterations": 39,
+      "real_time": 1.8779791796054596e+04,
+      "cpu_time": 9.0141177461538464e+05,
       "time_unit": "us"
     }
   ]

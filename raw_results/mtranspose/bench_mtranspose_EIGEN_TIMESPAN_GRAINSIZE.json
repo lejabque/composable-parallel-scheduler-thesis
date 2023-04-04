@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-04-04T13:13:40+03:00",
+    "date": "2023-04-04T22:04:48+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_mtranspose_EIGEN_TIMESPAN_GRAINSIZE",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [113.24,54.44,28.73],
+    "load_avg": [213.24,86.9,40.78],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 3258,
-      "real_time": 2.1026512588493804e+02,
-      "cpu_time": 9.8319880693677114e+03,
+      "iterations": 3254,
+      "real_time": 2.1557077438042219e+02,
+      "cpu_time": 1.0027101616472031e+04,
       "time_unit": "us"
     }
   ]

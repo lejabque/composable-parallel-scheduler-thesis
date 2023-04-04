@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-04-04T13:13:32+03:00",
+    "date": "2023-04-04T22:04:41+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_mtranspose_EIGEN_SIMPLE",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [124.91,54.63,28.51],
+    "load_avg": [242.99,88.17,40.68],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -45,9 +45,9 @@
       "repetitions": 1,
       "repetition_index": 0,
       "threads": 1,
-      "iterations": 3282,
-      "real_time": 2.1268951545976270e+02,
-      "cpu_time": 9.9238240280316877e+03,
+      "iterations": 3224,
+      "real_time": 2.1481959966170803e+02,
+      "cpu_time": 1.0010750545905705e+04,
       "time_unit": "us"
     }
   ]

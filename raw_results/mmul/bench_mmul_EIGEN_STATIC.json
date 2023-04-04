@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2023-04-04T13:12:47+03:00",
+    "date": "2023-04-04T22:03:56+03:00",
     "host_name": "collab1",
     "executable": "cmake-build-release/benchmarks/bench_mmul_EIGEN_STATIC",
     "num_cpus": 48,
@@ -32,7 +32,7 @@
         "num_sharing": 24
       }
     ],
-    "load_avg": [17.62,21.44,16.76],
+    "load_avg": [10.77,19.63,16.92],
     "library_build_type": "release"
   },
   "benchmarks": [
@@ -46,8 +46,8 @@
       "repetition_index": 0,
       "threads": 1,
       "iterations": 8,
-      "real_time": 9.3058592523448169e+04,
-      "cpu_time": 4.4385276099999975e+06,
+      "real_time": 9.0964737581089139e+04,
+      "cpu_time": 4.3215066950000003e+06,
       "time_unit": "us"
     }
   ]

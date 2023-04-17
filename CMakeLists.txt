@@ -74,8 +74,6 @@ if($ENV{ENABLE_RAPID})
   list(APPEND EIGEN_MODES EIGEN_RAPID)
 endif()
 list(APPEND EIGEN_MODES EIGEN_SIMPLE EIGEN_TIMESPAN EIGEN_TIMESPAN_GRAINSIZE EIGEN_STATIC)
-list(APPEND MODES ${OMP_MODES} ${TBB_MODES} ${EIGEN_MODES})
-
 
 if ($ENV{USE_LB4OMP})
   set(OPENMP_STANDALONE_BUILD TRUE)
@@ -92,6 +90,8 @@ if ($ENV{USE_LB4OMP})
   list(APPEND OMP_MODES OMP_RUNTIME)
 endif()
 
+list(APPEND MODES ${OMP_MODES} ${TBB_MODES} ${EIGEN_MODES})
+
 function(add_target target exec mode)
     add_executable(${target} ${exec})
     if (mode MATCHES "^SERIAL")
@@ -101,10 +101,12 @@ function(add_target target exec mode)
       if (mode STREQUAL "OMP_RUNTIME")
         target_link_libraries(${target} lb4omp)
         # tricky patch to prefer built openmp over system's
-        add_custom_command(TARGET ${target}
-          POST_BUILD
-          COMMAND sudo patchelf --replace-needed "libomp.so" "${FETCHCONTENT_BASE_DIR}/lb4omp-build/runtime/src/libomp.so" $<TARGET_FILE:${target}>
-        )
+        # todo: this still doesn't work, only replacing installed openmp is working
+        # add_custom_command(TARGET ${target}
+        #   POST_BUILD
+        #   COMMAND sudo patchelf --replace-needed "libomp.so" "${FETCHCONTENT_BASE_DIR}/lb4omp-build/runtime/src/libomp.so" $<TARGET_FILE:${target}>
+        # )
+        target_link_libraries(${target} OpenMP::OpenMP_CXX)
       else()
         target_link_libraries(${target} OpenMP::OpenMP_CXX)
       endif()

@@ -16,6 +16,8 @@ foreach(bench IN LISTS BENCHMARKS)
         target_link_libraries(${target} benchmark::benchmark)
     endforeach()
 endforeach()
+add_target(bench_lb4omp bench_lb4omp.cpp OMP_RUNTIME)
+target_link_libraries(bench_lb4omp benchmark::benchmark)
 
 list(APPEND SPIN_PAYLOADS RELAX ATOMIC DISTRIBUTED_READ THREADLOCAL)
 foreach(payload IN LISTS SPIN_PAYLOADS)

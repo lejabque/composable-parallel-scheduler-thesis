@@ -1,0 +1,124 @@
+{
+  "context": {
+    "date": "2023-05-09T13:36:57+03:00",
+    "host_name": "collab1",
+    "executable": "cmake-build-release/benchmarks/bench_spmv_hyperbolic_OMP_GUIDED_NONMONOTONIC",
+    "num_cpus": 48,
+    "mhz_per_cpu": 2600,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 25165824,
+        "num_sharing": 24
+      }
+    ],
+    "load_avg": [19.91,20.75,11.44],
+    "library_build_type": "release"
+  },
+  "benchmarks": [
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:1024/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:1024/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 3291,
+      "real_time": 2.1279274407616867e+02,
+      "cpu_time": 1.0212634646004253e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:2048/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 1,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:2048/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1933,
+      "real_time": 3.2659365269907141e+02,
+      "cpu_time": 1.5675794309363686e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:4096/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 2,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:4096/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1071,
+      "real_time": 6.3484026089547172e+02,
+      "cpu_time": 3.0471882885154057e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:8192/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 3,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:8192/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 458,
+      "real_time": 1.4988176166750980e+03,
+      "cpu_time": 7.1941380786026202e+04,
+      "time_unit": "us"
+    },
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:16384/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 4,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:16384/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 225,
+      "real_time": 2.9879662228955162e+03,
+      "cpu_time": 1.4341718613333342e+05,
+      "time_unit": "us"
+    },
+    {
+      "name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:32768/process_time/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 5,
+      "run_name": "SpmvHyperbolic_OMP_GUIDED_NONMONOTONIC/width:32768/process_time/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 115,
+      "real_time": 6.0756844346937924e+03,
+      "cpu_time": 2.9161652191304363e+05,
+      "time_unit": "us"
+    }
+  ]
+}

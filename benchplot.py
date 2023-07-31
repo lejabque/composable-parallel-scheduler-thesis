@@ -98,14 +98,15 @@ def save_figure(path, fig, name):
 
 # returns new plot
 def plot_benchmark(type, benchmarks, title, verbose):
-    sums_by_name = {}
+    scaled_sums_by_name = {}
     for params, bench_results in benchmarks.items():
+        min_value = min(bench_results.values())
         for name, res in bench_results.items():
-            sums_by_name.setdefault(name, 0)
-            sums_by_name[name] += res
-    sums_by_name = {k: v / len(benchmarks) for k, v in sums_by_name.items()}
-    min_value = min(sums_by_name.values())
-    table_row = {title: {name: f"{res:.2f} us (x{res / min_value :.2f})" for name, res in sums_by_name.items()}}
+            scaled_sums_by_name.setdefault(name, 0)
+            scaled_sums_by_name[name] += res / min_value
+    # average relative difference with the best solution
+    scaled_sums_by_name = {k: v / len(benchmarks) for k, v in scaled_sums_by_name.items()}
+    table_row = {title: {name: f"{res:.2f} us (x{res :.2f})" for name, res in scaled_sums_by_name.items()}}
 
     params_count = len(benchmarks)
     if params_count == 1:
@@ -186,7 +187,7 @@ def plot_benchmark(type, benchmarks, title, verbose):
                     style = next(styles)
             ax.set_xlabel(f'Params ({params_str})', fontsize=14)
             ax.set_ylabel('Items', fontsize=14)
-        else: 
+        else:
             for params, bench_results in benchmarks.items():
                 for name, value in bench_results.items():
                     # print(name, value, math.log(value))
@@ -518,9 +519,12 @@ if __name__ == "__main__":
                 plt.close()
             for bench_type, bench in benchmarks[1].items():
                 print("Processing", bench_type)
-                fig, table_row = plot_benchmark("Throughput", bench, bench_type, verbose)
+                fig, _ = plot_benchmark("Throughput", bench, bench_type, verbose)
                 save_figure(current_res_path, fig, bench_type + "_throughput")
-                table = {**table, **table_row}
                 plt.close()
-            
-    print(generate_md_table(table))
+    # table for latencies only
+    table_res = generate_md_table(table)
+    print(table_res)
+    with open(os.path.join(res_path, "table.md"), "w") as f:
+        f.write(table_res)
+

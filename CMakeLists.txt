@@ -3,8 +3,10 @@ option(ENABLE_TESTS "Enable test" OFF)
 
 # set(CMAKE_C_COMPILER "/opt/user/BiSheng-compiler-2.5.0/bin/clang")
 # set(CMAKE_CXX_COMPILER "/opt/user/BiSheng-compiler-2.5.0/bin/clang++")
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+# set(CMAKE_C_COMPILER "gcc")
+# set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "clang++")
 
 project(composable-parallel-scheduler)
 

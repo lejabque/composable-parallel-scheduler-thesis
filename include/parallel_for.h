@@ -5,8 +5,11 @@
 #include "poor_barrier.h"
 #include "timespan_partitioner.h"
 #include "util.h"
+#include "proactive.h"
+#include <parallel/algorithms/for_each.hpp>
 #include <algorithm>
 #include <utility>
+#include <numeric>
 
 #if TBB_MODE == TBB_RAPID
 #include "rapid_start.h"
@@ -62,6 +65,18 @@ inline void EigenParallelFor(size_t from, size_t to, F &&func) {
 }
 #endif
 
+constexpr size_t MaxPseudoIterator = 5000006;
+inline void GetHugePseudoIterator() {
+  static bool initialized = false;
+  static std::vector<size_t> range(MaxPseudoIterator);
+  if (!initialized) {
+    std::iota(range.begin(), range.end(), 0);
+    initialized = true;
+  }
+
+  return GetHugePseudoIterator();
+}
+
 // TODO: move out some initializations from body to avoid init overhead?
 template <typename Func>
 void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
@@ -69,6 +84,13 @@ void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
   for (size_t i = from; i < to; ++i) {
     func(i);
   }
+#elif defined(HPX_MODE)
+#if HPX_MODE == HPX_STATIC
+  hpx::parallel::for_each(par, GetHugePseudoIterator().begin() + from, GetHugePseudoIterator().begin() + to, std::forward<Func>(func));
+#elif HPX_MODE == HPX_ASYNC
+  hpx::parallel::for_each(par(task), GetHugePseudoIterator().begin() + from, GetHugePseudoIterator().begin() + to, std::forward<Func>(func)).wait();
+#else
+  static_assert("unsupported HPX_MODE");
 #elif defined(TBB_MODE)
   static tbb::task_group_context context(
       tbb::task_group_context::bound,
@@ -146,6 +168,17 @@ inline void Warmup(size_t threadsNum) {
 inline void InitParallel(size_t threadsNum) {
 #if TBB_MODE == TBB_RAPID || EIGEN_MODE == EIGEN_RAPID
   static InitOnce rapidInit{[threadsNum]() { RapidGroup.init(threadsNum); }};
+#endif
+#ifdef HPX_MODE
+  GetHugePseudoIterator();
+  static InitOnce warmup{[threadsNum]() {
+    ParallelFor(0, threadsNum * threadsNum, [](size_t) {
+      for (size_t i = 0; i != 1000000; ++i) {
+        // do nothing
+        CpuRelax();
+      }
+    });
+  }};
 #endif
 #ifdef TBB_MODE
   static PinningObserver pinner; // just init observer

@@ -1,5 +1,6 @@
 #include "../include/parallel_for.h"
 #include <ctime>
+#include <vector>
 
 static void RunOnce(size_t threadNum, std::vector<Timestamp> *times) {
 #if defined(__x86_64__)

@@ -11,30 +11,35 @@ static void DoSetup(const benchmark::State &state) {
 }
 
 static constexpr auto width =
-    std::array<size_t, 6>{1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15};
+    std::array<size_t, 6>{1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1 << 17};
 
 static auto cachedMatrix = [] {
   std::unordered_map<size_t, SparseMatrixCSR<double>> res;
   for (auto &&w : width) {
     res[w] =
-        GenSparseMatrix<double, SparseKind::HYPERBOLIC>(MATRIX_SIZE, w, DENSITY);
+        GenSparseMatrix<double, SparseKind::HYPERBOLIC>(MATRIX_SIZE, w + (GetNumThreads() << 2) + 3, DENSITY);
+    benchmark::DoNotOptimize(res[w]);
   }
   return res;
 }();
 
-// cache matrix and vector for all iterations
-static auto x = GenVector<double>(MATRIX_SIZE);
+static auto x = GenVector<double>(*std::prev(width.end()) + (GetNumThreads() << 2) + 3);
 static std::vector<double> y(MATRIX_SIZE);
 
 static void BM_SpmvBenchHyperbolic(benchmark::State &state) {
+  benchmark::DoNotOptimize(x);
+  benchmark::DoNotOptimize(y);
+
   auto &A = cachedMatrix.at(state.range(0));
   for (auto _ : state) {
     MultiplyMatrix(A, x, y);
+    benchmark::ClobberMemory();
   }
 }
 
+
 BENCHMARK(BM_SpmvBenchHyperbolic)
-    ->Name("SpmvHyperbolic_" + GetParallelMode())
+    ->Name("SpmvHyperbolic_Latency_" + GetParallelMode())
     ->Setup(DoSetup)
     ->UseRealTime()
     ->MeasureProcessCPUTime()
@@ -43,4 +48,16 @@ BENCHMARK(BM_SpmvBenchHyperbolic)
     ->Range(*width.begin(), *std::prev(width.end()))
     ->Unit(benchmark::kMicrosecond);
 
+BENCHMARK(BM_SpmvBenchHyperbolic)
+    ->Name("SpmvHyperbolic_Throughput_" + GetParallelMode())
+    ->Setup(DoSetup)
+    ->UseRealTime()
+    ->MeasureProcessCPUTime()
+    ->ArgName("width")
+    ->RangeMultiplier(2)
+    ->Range(*width.begin(), *std::prev(width.end()))
+    ->Unit(benchmark::kMicrosecond)
+    ->MinTime(9);
+
 BENCHMARK_MAIN();
+

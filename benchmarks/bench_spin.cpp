@@ -37,7 +37,7 @@ static std::string GetSpinPayload() {
 }
 
 template <typename F>
-void RunParallelFor(Tracing::Tracer &tracer, size_t iters, size_t tasks,
+void __attribute__((noinline,noipa)) RunParallelFor(Tracing::Tracer &tracer, size_t iters, size_t tasks,
                     F &&f) {
   for (size_t iter = 0; iter != iters; ++iter) {
     tracer.RunIteration(tasks, f);
@@ -46,6 +46,7 @@ void RunParallelFor(Tracing::Tracer &tracer, size_t iters, size_t tasks,
 
 static void BM_Spin(benchmark::State &state) {
   Tracing::Tracer tracer;
+  benchmark::DoNotOptimize(tracer);
 #if SPIN_PAYLOAD == RELAX
   for (auto _ : state) {
     RunParallelFor(tracer, state.range(2), state.range(0),
@@ -54,6 +55,7 @@ static void BM_Spin(benchmark::State &state) {
                        CpuRelax();
                      }
                    });
+    benchmark::ClobberMemory();
   }
 #elif SPIN_PAYLOAD == ATOMIC
   auto atomicPtr = std::make_unique<Aligned<std::atomic<int>>>();
@@ -65,6 +67,7 @@ static void BM_Spin(benchmark::State &state) {
                        y = p->value.load();
                      }
                    });
+    benchmark::ClobberMemory();
   }
 #elif SPIN_PAYLOAD == DISTRIBUTED_READ
   std::vector<Aligned<std::unique_ptr<Aligned<int>>>> pointers(state.range(0));
@@ -80,6 +83,7 @@ static void BM_Spin(benchmark::State &state) {
                        y = p->value;
                      }
                    });
+    benchmark::ClobberMemory();
   }
 #elif SPIN_PAYLOAD == THREADLOCAL
   for (auto _ : state) {
@@ -91,6 +95,7 @@ static void BM_Spin(benchmark::State &state) {
                        y = x;
                      }
                    });
+    benchmark::ClobberMemory();
   }
 #else
   static_assert(false, "Unsupported mode");
@@ -109,6 +114,7 @@ static constexpr size_t ScaleIterations(size_t count) {
 #endif
 }
 
+
 BENCHMARK(BM_Spin)
     ->Name(std::string("Spin_") + GetSpinPayload() + "_" + GetParallelMode())
     ->Setup(DoSetup)
@@ -124,3 +130,4 @@ BENCHMARK(BM_Spin)
     ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_MAIN();
+

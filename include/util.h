@@ -35,9 +35,14 @@ inline Timestamp Now() {
 #if defined(__x86_64__)
   return __rdtsc();
 #elif defined(__aarch64__)
-  Timestamp val;
-  asm volatile("mrs %0, cntvct_el0" : "=r"(val));
-  return val;
+  // System timer of ARMv8 runs at a different frequency than the CPU's.
+  // The frequency is fixed, typically in the range 1-50MHz.  It can be
+  // read at CNTFRQ special register.  We assume the OS has set up
+  // the virtual timer properly.
+  asm volatile("isb");
+  Timestamp virtual_timer_value;
+  asm volatile("mrs %0, cntvct_el0" : "=r"(virtual_timer_value));
+  return virtual_timer_value;
 #else
 #error "Unsupported architecture
 #endif

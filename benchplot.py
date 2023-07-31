@@ -13,6 +13,13 @@ import os
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import AutoMinorLocator
 
+HPX_MODES = [
+    "HPX_STATIC",
+    "HPX_ASYNC"
+]
+PROACTIVE_MODES = [
+    "PROACTIVE_STATIC"
+]
 OMP_MODES = [
     "OMP_STATIC",
     "OMP_DYNAMIC_NONMONOTONIC",
@@ -39,9 +46,11 @@ filtered_modes = set()
 # filtered_modes.update(EIGEN_MODES)
 
 # thesis (final):
-filtered_modes.update(["EIGEN_TIMESPAN_GRAINSIZE",
-                       "OMP_STATIC", "OMP_DYNAMIC_NONMONOTONIC", "OMP_GUIDED_NONMONOTONIC",
-                       "TBB_AFFINITY", "TBB_SIMPLE", "TBB_AUTO"])
+filtered_modes.update([ # "PROACTIVE_STATIC",
+                       "EIGEN_TIMESPAN_GRAINSIZE", # "EIGEN_STATIC", "EIGEN_TIMESPAN",
+                       "OMP_STATIC", "OMP_DYNAMIC_NONMONOTONIC", "OMP_GUIDED_NONMONOTONIC", #])
+                       "TBB_AFFINITY", "TBB_SIMPLE", "TBB_AUTO",
+                       "HPX_STATIC", "HPX_AUTO"])
 
 filtered_benchmarks = set()
 # filtered_benchmarks.update(["spmv"])
@@ -88,7 +97,7 @@ def save_figure(path, fig, name):
 
 
 # returns new plot
-def plot_benchmark(benchmarks, title, verbose):
+def plot_benchmark(type, benchmarks, title, verbose):
     sums_by_name = {}
     for params, bench_results in benchmarks.items():
         for name, res in bench_results.items():
@@ -111,19 +120,28 @@ def plot_benchmark(benchmarks, title, verbose):
             bench_results = sorted(bench_results.items(), key=lambda x: x[1])
             min_time = sorted(bench_results, key=lambda x: x[1])[0][1]
             params_str = ""
-            if params != "":
-                params_str = " with params " + params
+            # if params != "":
+            #     params_str = " with params " + params
             axis[iter][0].barh(*zip(*bench_results), zorder=3)
             axis[iter][0].xaxis.set_major_locator(plt.MaxNLocator(nbins=12))
             axis[iter][0].xaxis.set_minor_locator(AutoMinorLocator(5))
             if verbose:
-                axis[iter][0].set_xlabel(
-                    title + params_str + ", absolute time (lower is better), us",
-                    fontsize=14,
-                )
-                axis[iter][1].set_xlabel(
-                    title + params_str + ", normalized (higher is better)", fontsize=14
-                )
+                if "Throughput" == type:
+                    axis[iter][0].set_xlabel(
+                        title + params_str + ", processed iterations (higher is better)",
+                        fontsize=14,
+                    )
+                    axis[iter][1].set_xlabel(
+                        title + params_str + ", normalized (lower is better)", fontsize=14
+                    )
+                else:
+                    axis[iter][0].set_xlabel(
+                        title + params_str + ", absolute time (lower is better), us",
+                        fontsize=14,
+                    )
+                    axis[iter][1].set_xlabel(
+                        title + params_str + ", normalized (higher is better)", fontsize=14
+                    )
                 axis[iter][1].barh(
                     *zip(*[(name, min_time / time) for name, time in bench_results]), zorder=3
                 )
@@ -148,20 +166,50 @@ def plot_benchmark(benchmarks, title, verbose):
         style = next(styles)
         color = next(colors)
         inverted = {}
-        for params, bench_results in benchmarks.items():
-            for name, value in bench_results.items():
-                inverted.setdefault(name, {})[params] = math.log(value)
-        params_str = ""
-        for name, bench_results in sorted(inverted.items()):
-            if not params_str:
-                params_str = ', '.join([x.split(':')[0] for x in list(bench_results.keys())[0].split(';')])
-            bench_results = {':'.join([x.split(':')[1] for x in k.split(';')]): v for k, v in bench_results.items()}
-            color = next(colors)
-            ax.plot(bench_results.keys(), bench_results.values(), marker='o', linestyle=style, color=color, label=name)
-            if color == 'k':
-                style = next(styles)
-        ax.set_xlabel(f'Params ({params_str})', fontsize=14)
-        ax.set_ylabel('Time, log(us)', fontsize=14)
+        if "Throughput" == type:
+            for params, bench_results in benchmarks.items():
+                for name, value in bench_results.items():
+                    inverted.setdefault(name, {})[params] = value
+            params_str = ""
+            for name, bench_results in sorted(inverted.items()):
+                if not params_str:
+                    params_str = [x.split(':')[0] for x in list(bench_results.keys())[0].split(';')][0]
+                if "spmv" in title:
+                    bench_results = {str(int([x.split(':')[1] for x in k.split(';')][0]) + 195): v for k, v in bench_results.items()}
+                elif 'reduce' in title:
+                    bench_results = {str(int([x.split(':')[1] for x in k.split(';')][0]) + 51): v for k, v in bench_results.items()}
+                else:
+                    bench_results = {[x.split(':')[1] for x in k.split(';')][0]: v for k, v in bench_results.items()}
+                color = next(colors)
+                ax.plot(bench_results.keys(), bench_results.values(), marker='o', linestyle=style, color=color, label=name)
+                if color == 'k':
+                    style = next(styles)
+            ax.set_xlabel(f'Params ({params_str})', fontsize=14)
+            ax.set_ylabel('Items', fontsize=14)
+        else: 
+            for params, bench_results in benchmarks.items():
+                for name, value in bench_results.items():
+                    # print(name, value, math.log(value))
+                    inverted.setdefault(name, {})[params] = math.log10(value)
+            params_str = ""
+            for name, bench_results in sorted(inverted.items()):
+                if not params_str:
+                    params_str = ', '.join([x.split(':')[0] for x in list(bench_results.keys())[0].split(';')])
+                if not params_str:
+                    params_str = ', '.join([x.split(':')[0] for x in list(bench_results.keys())[0].split(';')])
+                if "spmv" in title:
+                    bench_results = {str(int([x.split(':')[1] for x in k.split(';')][0]) + 195): v for k, v in bench_results.items()}
+                elif 'reduce' in title:
+                    bench_results = {str(int([x.split(':')[1] for x in k.split(';')][0]) + 51): v for k, v in bench_results.items()}
+                else:
+                    bench_results = {[x.split(':')[1] for x in k.split(';')][0]: v for k, v in bench_results.items()}
+                color = next(colors)
+                # print(bench_results)
+                ax.plot(bench_results.keys(), bench_results.values(), marker='o', linestyle=style, color=color, label=name)
+                if color == 'k':
+                    style = next(styles)
+            ax.set_xlabel(f'Params ({params_str})', fontsize=14)
+            ax.set_ylabel('Time, log10(us)', fontsize=14)
         ax.set_title(title)
         ax.yaxis.set_major_locator(plt.MaxNLocator(nbins=12))
         ax.yaxis.set_minor_locator(AutoMinorLocator(5))
@@ -172,7 +220,7 @@ def plot_benchmark(benchmarks, title, verbose):
 
 
 def parse_benchmarks(folder_name):
-    benchmarks_by_type = {}
+    benchmarks_by_type = [{}, {}]
     for bench_file in os.listdir(folder_name):
         if not bench_file.endswith(".json"):
             continue
@@ -192,11 +240,16 @@ def parse_benchmarks(folder_name):
                     params = ";".join(
                         x.group()[1:] for x in re.finditer(r"\/\w+:\d+", res["name"])
                     )
-                    benchmarks_by_type.setdefault(bench_type, {}).setdefault(
-                        params, {}
-                    )[bench_mode] = res["real_time"]
+                    if "Throughput" not in res["name"]:
+                        benchmarks_by_type[0].setdefault(bench_type, {}).setdefault(
+                            params, {}
+                        )[bench_mode] = res["real_time"]
+                    else:
+                        benchmarks_by_type[1].setdefault(bench_type, {}).setdefault(
+                            params, {}
+                        )[bench_mode] = 9000000 / res["real_time"]
             else:
-                benchmarks_by_type.setdefault(bench_type, {}).setdefault("", {})[
+                benchmarks_by_type[0].setdefault(bench_type, {}).setdefault("", {})[
                     bench_mode
                 ] = bench
     return benchmarks_by_type
@@ -420,7 +473,7 @@ if __name__ == "__main__":
         benchmarks = parse_benchmarks(os.path.join(folder_name, subdir))
         if subdir == "scheduling_dist":
             scheduling_times_by_suffix = {}
-            for bench_mode, res in benchmarks["scheduling_dist"][""].items():
+            for bench_mode, res in benchmarks[0]["scheduling_dist"][""].items():
                 bench_mode, measure_mode = bench_mode.rsplit("_", 1)
                 if filtered_modes and bench_mode not in filtered_modes:
                     continue
@@ -449,26 +502,25 @@ if __name__ == "__main__":
             current_res_path = os.path.join(res_path, "scheduling_dist")
             if not os.path.exists(current_res_path):
                 os.makedirs(current_res_path)
-            with Pool() as pool:
-                # call the function for each item in parallel
-                pool.map(
-                    partial(
-                        plot_scheduling_dist_item,
-                        res_path=current_res_path,
-                        verbose=verbose,
-                    ),
-                    benchmarks["scheduling_dist"][""].items(),
-                )
+            for item in benchmarks[0]["scheduling_dist"][""].items():
+                plot_scheduling_dist_item(res_path=current_res_path, verbose=verbose, item=item)
         elif subdir != "trace_spin":
             current_res_path = os.path.join(res_path, subdir)
             if filtered_benchmarks and subdir not in filtered_benchmarks:
                 continue
             if not os.path.exists(current_res_path):
                 os.makedirs(current_res_path)
-            for bench_type, bench in benchmarks.items():
+            for bench_type, bench in benchmarks[0].items():
                 print("Processing", bench_type)
-                fig, table_row = plot_benchmark(bench, bench_type, verbose)
-                save_figure(current_res_path, fig, bench_type)
+                fig, table_row = plot_benchmark("Latency", bench, bench_type, verbose)
+                save_figure(current_res_path, fig, bench_type + "_latency")
                 table = {**table, **table_row}
                 plt.close()
+            for bench_type, bench in benchmarks[1].items():
+                print("Processing", bench_type)
+                fig, table_row = plot_benchmark("Throughput", bench, bench_type, verbose)
+                save_figure(current_res_path, fig, bench_type + "_throughput")
+                table = {**table, **table_row}
+                plt.close()
+            
     print(generate_md_table(table))

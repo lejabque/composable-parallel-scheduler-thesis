@@ -3,6 +3,7 @@
 #include "util.h"
 #include <sstream>
 #include <vector>
+#include <unordered_map>
 
 namespace Tracing {
 struct TaskTrace {

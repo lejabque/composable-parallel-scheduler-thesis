@@ -2,12 +2,16 @@
 #include "eigen_pool.h"
 #include "modes.h"
 #include "num_threads.h"
+
+#include <cstddef>
 #include <iostream>
 #include <sched.h>
 #include <string>
-
-#include <cstddef>
 #include <thread>
+#if defined(__x86_64__)
+// for rdtsc
+#include "x86intrin.h"
+#endif
 
 using ThreadId = int;
 
@@ -44,7 +48,7 @@ inline Timestamp Now() {
   asm volatile("mrs %0, cntvct_el0" : "=r"(virtual_timer_value));
   return virtual_timer_value;
 #else
-#error "Unsupported architecture
+#error "Unsupported architecture"
 #endif
   // return std::chrono::duration_cast<std::chrono::nanoseconds>(
   //            std::chrono::high_resolution_clock::now().time_since_epoch())

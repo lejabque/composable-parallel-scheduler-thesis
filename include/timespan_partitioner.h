@@ -70,7 +70,7 @@ struct Task {
 #elif defined(__aarch64__)
     return 1800;
 #else
-#error "Unsupported architecture
+#error "Unsupported architecture"
 #endif
   }();
 

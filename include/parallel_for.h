@@ -5,8 +5,7 @@
 #include "poor_barrier.h"
 #include "timespan_partitioner.h"
 #include "util.h"
-#include "proactive.h"
-#include <parallel/algorithms/for_each.hpp>
+#include <vector>
 #include <algorithm>
 #include <utility>
 #include <numeric>
@@ -91,6 +90,7 @@ void ParallelFor(size_t from, size_t to, Func &&func, size_t grainSize = 1) {
   hpx::parallel::for_each(par(task), GetHugePseudoIterator().begin() + from, GetHugePseudoIterator().begin() + to, std::forward<Func>(func)).wait();
 #else
   static_assert("unsupported HPX_MODE");
+#endif
 #elif defined(TBB_MODE)
   static tbb::task_group_context context(
       tbb::task_group_context::bound,

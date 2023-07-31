@@ -53,12 +53,12 @@ if (ENABLE_TESTS)
 endif()
 
 # link with HPX
-FetchContent_Declare(
-  hpx
-  GIT_REPOSITORY https://github.com/STEllAR-GROUP/hpx.git
-  GIT_TAG 1.4.0
-)
-FetchContent_MakeAvailable(hpx)
+# FetchContent_Declare(
+#   hpx
+#   GIT_REPOSITORY https://github.com/STEllAR-GROUP/hpx.git
+#   GIT_TAG 1.4.0
+# )
+# FetchContent_MakeAvailable(hpx)
 
 # link with TBB
 FetchContent_Declare(
@@ -78,7 +78,8 @@ if(ENABLE_SANITIZERS)
   set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address,undefined,leak")
 endif()
 
-list(APPEND HPX_MODES HPX_STATIC HPX_ASYNC)
+# HPX modes:
+#list(APPEND HPX_MODES HPX_STATIC HPX_ASYNC)
 
 # find_package(Threads)
 # list(APPEND PROACTIVE_MODES PROACTIVE_STATIC)
